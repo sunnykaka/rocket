@@ -37,12 +37,14 @@ public class RocketClient {
             ChannelFuture f = b.connect(host, port).sync();
 
             ByteBuf firstMessage = Unpooled.buffer(64);
-            try {
-                firstMessage.writeBytes("你好啊".getBytes("UTF-8"));
+//            try {
+//                firstMessage.writeBytes("你好啊".getBytes("UTF-8"));
+                int message = 204;
+                firstMessage.writeByte(message);
                 f.channel().writeAndFlush(firstMessage);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+//            } catch (UnsupportedEncodingException e) {
+//                e.printStackTrace();
+//            }
             // Wait until the connection is closed.
             f.channel().closeFuture().sync();
         } finally {

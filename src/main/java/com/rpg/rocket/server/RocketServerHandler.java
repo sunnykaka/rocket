@@ -28,8 +28,9 @@ public class RocketServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ByteBuf byteBuf = (ByteBuf) msg;
-        System.out.println(byteBuf.toString(CharsetUtil.UTF_8));
-        ctx.writeAndFlush(byteBuf);
+//        System.out.println(byteBuf.toString(CharsetUtil.UTF_8));
+//        ctx.writeAndFlush(byteBuf);
+        System.out.println(((Byte)byteBuf.getByte(0)).intValue());
 //        try {
 //        } finally {
 //            ReferenceCountUtil.release(msg);
