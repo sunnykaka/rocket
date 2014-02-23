@@ -10,17 +10,18 @@ import io.netty.buffer.ByteBuf;
  */
 public class RocketProtocol {
 
-    public static final int HEAD_LENGTH = 1 + 1 + 1 + 1 + 4 + 4 + 4 + 4 + 4;
+    public static final int HEAD_LENGTH = 1 + 1 + 1 + 1 + 4 + 4 + 4 + 8 + 8;
 
-    private RocketProtocol(int version, int phase, int status, int type, long id, long timeout, long protocolId, int dataLength, byte[] data) {
+    private RocketProtocol(int version, int phase, int status, int type, int id, int messageType, int dataLength, long timeout, long keepData, byte[] data) {
         this.version = version;
         this.phase = phase;
         this.status = status;
         this.type = type;
         this.id = id;
-        this.timeout = timeout;
-        this.protocolId = protocolId;
+        this.messageType = messageType;
         this.dataLength = dataLength;
+        this.timeout = timeout;
+        this.keepData = keepData;
         this.data = data;
     }
 
@@ -32,16 +33,16 @@ public class RocketProtocol {
 
     private int type;
 
-    private long id;
+    private int id;
 
-    private long timeout;
-
-    private long protocolId;
+    private int messageType;
 
     private int dataLength;
 
-    //kept 4 bytes in head
-    //private long keepData;
+    private long timeout;
+
+    //kept 8 bytes in head
+    private long keepData;
 
     private byte[] data;
 
@@ -53,10 +54,11 @@ public class RocketProtocol {
         int phase = UnsignedBytes.toInt(in.readByte());
         int status = UnsignedBytes.toInt(in.readByte());
         int type = UnsignedBytes.toInt(in.readByte());
-        long id = UnsignedInts.toLong(in.readInt());
-        long timeout = UnsignedInts.toLong(in.readInt());
-        long protocolId = UnsignedInts.toLong(in.readInt());
+        int id = in.readInt();
+        int messageType = in.readInt();
         int dataLength = in.readInt();
+        long timeout = in.readLong();
+        long keepData = in.readLong();
         byte[] data = null;
         if(dataLength > 0) {
             if(in.readableBytes() < dataLength) {
@@ -67,7 +69,7 @@ public class RocketProtocol {
             data = new byte[dataLength];
             in.readBytes(data, 0, dataLength);
         }
-        RocketProtocol protocol = new RocketProtocol(version, phase, status, type, id, timeout, protocolId, dataLength, data);
+        RocketProtocol protocol = new RocketProtocol(version, phase, status, type, id, messageType, dataLength, timeout, keepData, data);
         return protocol;
     }
 
@@ -76,10 +78,11 @@ public class RocketProtocol {
         out.writeByte((byte)phase);
         out.writeByte((byte)status);
         out.writeByte((byte)type);
-        out.writeInt((int) id);
-        out.writeInt((int) timeout);
-        out.writeInt((int) protocolId);
+        out.writeInt(id);
+        out.writeInt(messageType);
         out.writeInt(dataLength);
+        out.writeLong(timeout);
+        out.writeLong(keepData);
         if(dataLength > 0) {
             out.writeBytes(data, 0, dataLength);
         }
@@ -109,8 +112,8 @@ public class RocketProtocol {
         return timeout;
     }
 
-    public long getProtocolId() {
-        return protocolId;
+    public long getMessageType() {
+        return messageType;
     }
 
     public int getDataLength() {
