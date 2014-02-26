@@ -1,0 +1,16 @@
+package rocket.domain.pb;
+
+option java_package = "com.rpg.rocket.domain";
+option java_outer_classname = "UserProtos";
+
+message User {
+    required int64 id = 1;
+    required string username = 2;
+    optional string password = 3;
+    optional Coordinate coordinate = 4;
+
+    message Coordinate {
+        required float x = 1;
+        required float y = 2;
+    }
+}
