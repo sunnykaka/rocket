@@ -1,0 +1,22 @@
+package rocket.message.pb;
+
+import "rocket/domain/pb/user.proto";
+import "rocket/message/pb/basemsg.proto";
+
+
+option java_package = "com.rpg.rocket.message";
+option java_outer_classname = "LoginProtos";
+
+message LoginRequest {
+
+    optional string username = 1;
+    optional string password = 2;
+
+}
+
+message LoginResponse {
+
+    optional ResponseMsg response = 1;
+    optional User user = 2;
+
+}

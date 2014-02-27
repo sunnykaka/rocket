@@ -1,17 +1,14 @@
-package com.rpg;
+package com.rpg.rocket;
 
 
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-
 /**
  * Unit test for simple App.
  */
 @Test
-public class AppTest {
+public class PlainTest {
 
     @BeforeTest
     public void init() {

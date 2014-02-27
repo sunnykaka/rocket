@@ -1,0 +1,21 @@
+package rocket.message.pb;
+
+option java_package = "com.rpg.rocket.message";
+option java_outer_classname = "BaseMsgProtos";
+
+message RequestMsg {
+    optional int64 user_id = 1;
+}
+
+message ResponseMsg {
+    required ResponseStatus status = 1;
+    optional string msg = 2;
+}
+
+enum ResponseStatus {
+    SUCCESS = 0;
+    UNKNOWN_ERROR = 1;
+
+    USERNAME_NOT_EXIST = 100;
+    PASSWORD_INCORRECT = 101;
+}
