@@ -57,7 +57,14 @@ public class RocketServer {
         } else {
             port = 8080;
         }
-        new RocketServer(port).run();
+        RocketServer rocketServer = new RocketServer(port);
+
+        rocketServer.init();
+        rocketServer.run();
+    }
+
+    private void init() {
+        
     }
 
 }
