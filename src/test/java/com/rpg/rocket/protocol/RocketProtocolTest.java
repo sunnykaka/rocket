@@ -1,6 +1,7 @@
 package com.rpg.rocket.protocol;
 
 
+import com.rpg.rocket.BaseTest;
 import com.rpg.rocket.domain.UserProtos;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -13,7 +14,7 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
 @Test
-public class RocketProtocolTest {
+public class RocketProtocolTest extends BaseTest{
 
     @BeforeTest
     public void init() {
@@ -96,43 +97,4 @@ public class RocketProtocolTest {
 
     }
 
-    private UserProtos.User buildUser() {
-        UserProtos.User.Builder user = UserProtos.User.newBuilder();
-        user.setId(1234L);
-        user.setUsername("asd");
-        UserProtos.User.Coordinate.Builder coordinate = UserProtos.User.Coordinate.newBuilder();
-        coordinate.setX(12.12f);
-        coordinate.setY(32.32f);
-        user.setCoordinate(coordinate);
-        return user.build();
-    }
-
-    private RocketProtocol buildProtocol(int version, RocketProtocol.Phase phase, RocketProtocol.Type type, RocketProtocol.Status status,
-                                         int timeout, UserProtos.User user) {
-
-
-        RocketProtocol.Builder protocolBuilder = RocketProtocol.newBuilder();
-        protocolBuilder.setVersion(version).setPhase(phase).setType(type).setStatus(status).setTimeout(timeout);
-        if(user != null) {
-            String messageType = user.getDescriptorForType().getFullName();
-            byte[] data = user.toByteArray();
-            protocolBuilder.setMessageTypeWithLength(messageType).setDataWithLength(data);
-        }
-
-        return protocolBuilder.build();
-    }
-
-    private void assertProtocolEquals(RocketProtocol protocol, RocketProtocol decodeProtocol) {
-        assertThat(decodeProtocol, notNullValue());
-        assertThat(decodeProtocol.getVersion(), is(protocol.getVersion()));
-        assertThat(decodeProtocol.getPhase(), is(protocol.getPhase()));
-        assertThat(decodeProtocol.getStatus(), is(protocol.getStatus()));
-        assertThat(decodeProtocol.getType(), is(protocol.getType()));
-        assertThat(decodeProtocol.getId(), is(protocol.getId()));
-        assertThat(decodeProtocol.getTimeout(), is(protocol.getTimeout()));
-        assertThat(decodeProtocol.getMessageTypeLength(), is(protocol.getMessageTypeLength()));
-        assertThat(decodeProtocol.getMessageType(), is(protocol.getMessageType()));
-        assertThat(decodeProtocol.getDataLength(), is(protocol.getDataLength()));
-        assertThat(true, is(Arrays.equals(protocol.getData(), decodeProtocol.getData())));
-    }
 }

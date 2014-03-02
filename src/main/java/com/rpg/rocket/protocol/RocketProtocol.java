@@ -2,6 +2,9 @@ package com.rpg.rocket.protocol;
 
 import com.google.common.base.Charsets;
 import com.google.common.primitives.UnsignedBytes;
+import com.google.protobuf.AbstractMessage;
+import com.google.protobuf.MessageLite;
+import com.rpg.rocket.exception.RocketProtocolException;
 import com.rpg.rocket.util.Clock;
 import com.rpg.rocket.util.IdGenerator;
 import io.netty.buffer.ByteBuf;
@@ -30,24 +33,34 @@ public class RocketProtocol {
         this.data = data;
     }
 
+    /** 协议版本号(0x01) 1byte **/
     private int version;
 
+    /** 当前协议阶段(0x0F明文传输，0x1F加密传输, 0xFF其他) 1byte **/
     private Phase phase;
 
+    /** 状态码(0x01-成功, 0x02-解密失败, 0x03-数据损坏, 0x04-其他错误)  1byte [only response] **/
     private Status status;
 
+    /** 类型（0x0F request，0x1F response）1byte **/
     private Type type;
 
+    /** 请求/响应ID 4byte **/
     private int id;
 
+    /** 超时时间,unix time 8byte [only request] **/
     private long timeout;
 
+    /** 消息类型名称长度 2byte **/
     private int messageTypeLength;
 
+    /** 消息长度 4byte **/
     private int dataLength;
 
+    /** 消息类型名称长度 **/
     private String messageType;
 
+    /** 消息 **/
     private byte[] data;
 
 
@@ -197,9 +210,9 @@ public class RocketProtocol {
 
     public enum Type {
 
-        REQUEST(1),
+        REQUEST(0x0F),
 
-        RESPONSE(2);
+        RESPONSE(0x1F);
 
         private int value;
 
@@ -264,17 +277,17 @@ public class RocketProtocol {
             return this;
         }
 
-        public Builder setMessageTypeWithLength(String messageType) {
-            protocol.messageType = messageType;
-            if(!StringUtils.isBlank(messageType)) {
+        public Builder setMessage(AbstractMessage message) {
+            if(message != null) {
+                String messageType = message.getDescriptorForType().getFullName();
+                byte[] data = message.toByteArray();
+                if(protocol.messageType != null || protocol.messageTypeLength != 0 ||
+                        protocol.data != null || protocol.dataLength != 0) {
+                    throw new RocketProtocolException("创建RocketProtocol失败,为protocol添加message的时候发现内部data或messageType不为空");
+                }
+                protocol.messageType = messageType;
                 protocol.messageTypeLength = messageType.getBytes(Charsets.UTF_8).length;
-            }
-            return this;
-        }
-
-        public Builder setDataWithLength(byte[] data) {
-            protocol.data = data;
-            if(data != null) {
+                protocol.data = data;
                 protocol.dataLength = data.length;
             }
             return this;

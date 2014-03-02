@@ -1,13 +1,14 @@
 package com.rpg.rocket.server;
 
+import com.rpg.rocket.protocol.RocketProtocolDecoder;
+import com.rpg.rocket.protocol.RocketProtocolEncoder;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * User: liubin
@@ -15,39 +16,54 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
  */
 public class RocketServer {
 
+    private static final Logger log = LoggerFactory.getLogger(RocketServer.class);
+
     private int port;
 
     public RocketServer(int port) {
         this.port = port;
     }
 
-    public void run() throws Exception {
+    public Channel accept(final ServerBootstrap b) throws InterruptedException{
+        Channel channel = b.bind(port).sync().channel();
+
+        channel.closeFuture().addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                log.info("server closed.");
+                b.childGroup().shutdownGracefully();
+                b.group().shutdownGracefully();
+            }
+        });
+
+        return channel;
+    }
+
+    public Channel accept(final ChannelInboundHandlerAdapter handler) throws InterruptedException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
-        try {
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .childHandler(new ChannelInitializer<SocketChannel>() { // (4)
-                        @Override
-                        public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new RocketServerHandler());
+
+        ServerBootstrap b = new ServerBootstrap();
+        b.group(bossGroup, workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .childHandler(new ChannelInitializer<SocketChannel>() { // (4)
+                    @Override
+                    public void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline().addLast(new RocketProtocolDecoder());
+                        ch.pipeline().addLast(new RocketProtocolEncoder());
+                        if(handler != null) {
+                            ch.pipeline().addLast(handler);
                         }
-                    })
-                    .option(ChannelOption.SO_BACKLOG, 128)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+                    }
+                })
+                .option(ChannelOption.SO_BACKLOG, 128)
+                .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-            // Bind and start to accept incoming connections.
-            ChannelFuture f = b.bind(port).sync();
+        return accept(b);
+    }
 
-            // Wait until the server socket is closed.
-            // In this example, this does not happen, but you can do that to gracefully
-            // shut down your server.
-            f.channel().closeFuture().sync();
-        } finally {
-            workerGroup.shutdownGracefully();
-            bossGroup.shutdownGracefully();
-        }
+    public Channel accept() throws InterruptedException {
+        return accept(new RocketServerProtocolHandler());
     }
 
     public static void main(String[] args) throws Exception {
@@ -60,7 +76,7 @@ public class RocketServer {
         RocketServer rocketServer = new RocketServer(port);
 
         rocketServer.init();
-        rocketServer.run();
+        rocketServer.accept();
     }
 
     private void init() {
