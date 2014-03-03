@@ -26,9 +26,9 @@ public class NettyServerClientTest extends BaseTest {
         final List<RocketProtocol> clientProtocolList = new LinkedList<>();
         final List<RocketProtocol> serverProtocolList = new CopyOnWriteArrayList<>();
 
-        RocketProtocol protocol1 = buildProtocol(0, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Type.REQUEST, null, 10000, buildUser());
-        RocketProtocol protocol2 = buildProtocol(0, RocketProtocol.Phase.CIPHERTEXT, RocketProtocol.Type.RESPONSE, RocketProtocol.Status.DATA_CORRUPT, 0, buildUser());
-        RocketProtocol protocol3 = buildProtocol(0, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Type.RESPONSE, RocketProtocol.Status.SUCCESS, 0, null);
+        RocketProtocol protocol1 = buildProtocol(1, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Type.REQUEST, null, 10000, buildUser());
+        RocketProtocol protocol2 = buildProtocol(1, RocketProtocol.Phase.CIPHERTEXT, RocketProtocol.Type.RESPONSE, RocketProtocol.Status.DATA_CORRUPT, 0, buildUser());
+        RocketProtocol protocol3 = buildProtocol(1, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Type.RESPONSE, RocketProtocol.Status.SUCCESS, 0, null);
 
         clientProtocolList.add(protocol1);
         clientProtocolList.add(protocol2);

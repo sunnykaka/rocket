@@ -3,6 +3,7 @@ package com.rpg.rocket.protocol;
 import com.google.common.base.Charsets;
 import com.google.common.primitives.UnsignedBytes;
 import com.google.protobuf.AbstractMessage;
+import com.google.protobuf.Message;
 import com.google.protobuf.MessageLite;
 import com.rpg.rocket.exception.RocketProtocolException;
 import com.rpg.rocket.util.Clock;
@@ -158,7 +159,7 @@ public class RocketProtocol {
 
         OTHER(0xFF);
 
-        private int value;
+        public int value;
 
         Phase(int value) {
             this.value = value;
@@ -186,9 +187,17 @@ public class RocketProtocol {
 
         DATA_CORRUPT(3),
 
-        OTHER(4);
+        OTHER(4),
 
-        private int value;
+        INVALID_VERSION(5),
+
+        INVALID_PHASE(6),
+
+        UNKNOWN_MESSAGE_TYPE(7);
+
+
+
+        public int value;
 
         Status(int value) {
             this.value = value;
@@ -214,7 +223,7 @@ public class RocketProtocol {
 
         RESPONSE(0x1F);
 
-        private int value;
+        public int value;
 
         Type(int value) {
             this.value = value;
@@ -277,7 +286,7 @@ public class RocketProtocol {
             return this;
         }
 
-        public Builder setMessage(AbstractMessage message) {
+        public Builder setMessage(Message message) {
             if(message != null) {
                 String messageType = message.getDescriptorForType().getFullName();
                 byte[] data = message.toByteArray();

@@ -25,7 +25,7 @@ public class RocketProtocolTest extends BaseTest{
     public void testRequestNormal() throws Exception{
         UserProtos.User user = buildUser();
 
-        RocketProtocol protocol = buildProtocol(0, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Type.REQUEST, null, 60, user);
+        RocketProtocol protocol = buildProtocol(1, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Type.REQUEST, null, 60, user);
 
         ByteBuf buffer = Unpooled.buffer();
         protocol.encode(buffer);
@@ -39,7 +39,7 @@ public class RocketProtocolTest extends BaseTest{
     public void testResponseNormal() throws Exception{
         UserProtos.User user = buildUser();
 
-        RocketProtocol protocol = buildProtocol(0, RocketProtocol.Phase.CIPHERTEXT, RocketProtocol.Type.RESPONSE, RocketProtocol.Status.SUCCESS, 0, user);
+        RocketProtocol protocol = buildProtocol(1, RocketProtocol.Phase.CIPHERTEXT, RocketProtocol.Type.RESPONSE, RocketProtocol.Status.SUCCESS, 0, user);
 
         ByteBuf buffer = Unpooled.buffer();
         protocol.encode(buffer);
@@ -52,7 +52,7 @@ public class RocketProtocolTest extends BaseTest{
     @Test
     public void testRequestEmptyData() throws Exception{
 
-        RocketProtocol protocol = buildProtocol(0, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Type.REQUEST, null, 0, null);
+        RocketProtocol protocol = buildProtocol(1, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Type.REQUEST, null, 0, null);
 
         ByteBuf buffer = Unpooled.buffer();
         protocol.encode(buffer);
@@ -65,7 +65,7 @@ public class RocketProtocolTest extends BaseTest{
     @Test
     public void testResponseEmptyData() throws Exception{
 
-        RocketProtocol protocol = buildProtocol(0, RocketProtocol.Phase.CIPHERTEXT, RocketProtocol.Type.RESPONSE, null, 3000, null);
+        RocketProtocol protocol = buildProtocol(1, RocketProtocol.Phase.CIPHERTEXT, RocketProtocol.Type.RESPONSE, null, 3000, null);
 
         ByteBuf buffer = Unpooled.buffer();
         protocol.encode(buffer);
@@ -78,9 +78,9 @@ public class RocketProtocolTest extends BaseTest{
     @Test
     public void testMultipleProtocolInOneBuffer() throws Exception{
 
-        RocketProtocol protocol1 = buildProtocol(0, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Type.REQUEST, null, 10000, buildUser());
-        RocketProtocol protocol2 = buildProtocol(0, RocketProtocol.Phase.CIPHERTEXT, RocketProtocol.Type.RESPONSE, RocketProtocol.Status.DATA_CORRUPT, 0, buildUser());
-        RocketProtocol protocol3 = buildProtocol(0, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Type.RESPONSE, RocketProtocol.Status.SUCCESS, 0, null);
+        RocketProtocol protocol1 = buildProtocol(1, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Type.REQUEST, null, 10000, buildUser());
+        RocketProtocol protocol2 = buildProtocol(1, RocketProtocol.Phase.CIPHERTEXT, RocketProtocol.Type.RESPONSE, RocketProtocol.Status.DATA_CORRUPT, 0, buildUser());
+        RocketProtocol protocol3 = buildProtocol(1, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Type.RESPONSE, RocketProtocol.Status.SUCCESS, 0, null);
 
         ByteBuf buffer = Unpooled.buffer();
         protocol1.encode(buffer);

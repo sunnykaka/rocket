@@ -2,6 +2,7 @@ package com.rpg.rocket.pb;
 
 import com.google.common.base.Preconditions;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Message;
 import com.rpg.rocket.domain.UserProtos;
 import com.rpg.rocket.exception.RocketException;
 import com.rpg.rocket.message.LoginProtos;
@@ -28,7 +29,8 @@ public class DescriptorRegistry {
 
     private AtomicBoolean initialized = new AtomicBoolean(false);
 
-    private Map<String, Descriptors.Descriptor> descriptorMap = new HashMap<>();
+    private Map<String, Class<? extends Message>> pbNameToClassMap = new HashMap<>();
+    private Map<String, Method> pbNameToParseMethodMap = new HashMap<>();
 
     private void init() {
         if(initialized.compareAndSet(false, true)) {
@@ -36,8 +38,12 @@ public class DescriptorRegistry {
         }
     }
 
-    public Descriptors.Descriptor getDesciptor(String fullName) {
-        return descriptorMap.get(fullName);
+    public Class<? extends Message> getMessageClass(String fullName) {
+        return pbNameToClassMap.get(fullName);
+    }
+
+    public Method getMessageParseMethod(String fullName) {
+        return pbNameToParseMethodMap.get(fullName);
     }
 
     public void register(Class<?> clazz) {
@@ -51,15 +57,30 @@ public class DescriptorRegistry {
         }
         if(getDescriptorResult instanceof Descriptors.Descriptor) {
             Descriptors.Descriptor descriptor = (Descriptors.Descriptor)getDescriptorResult;
-            descriptorMap.put(descriptor.getFullName(), descriptor);
+            pbNameToClassMap.put(descriptor.getFullName(), (Class<? extends Message>)clazz);
 
         } else if(getDescriptorResult instanceof Descriptors.FileDescriptor) {
             Descriptors.FileDescriptor fileDescriptor = (Descriptors.FileDescriptor)getDescriptorResult;
             for(Descriptors.Descriptor descriptor : fileDescriptor.getMessageTypes()) {
-                descriptorMap.put(descriptor.getFullName(), descriptor);
+                String className = fileDescriptor.getOptions().getJavaPackage() + "." + fileDescriptor.getOptions().getJavaOuterClassname()
+                        + "$" + descriptor.getName();
+                Class<? extends Message> messageClass;
+                try {
+                    messageClass = (Class<? extends Message>) Class.forName(className);
+                    pbNameToClassMap.put(descriptor.getFullName(), messageClass);
+                } catch (ClassNotFoundException e) {
+                    throw new RocketException(String.format("根据messageClassName找不到对应的class,register class[%s], getDescriptorResultClass[%s], messageClassName[%s]",
+                            clazz.getName(), getDescriptorResult.getClass().getName(), className));
+                }
+                try {
+                    pbNameToParseMethodMap.put(descriptor.getFullName(), messageClass.getMethod("parseFrom", byte[].class));
+                } catch (NoSuchMethodException e) {
+                    throw new RocketException(String.format("messageClass没有parseFrom方法,register class[%s], getDescriptorResultClass[%s], messageClassName[%s]",
+                            clazz.getName(), getDescriptorResult.getClass().getName(), className));
+                }
             }
         } else {
-            throw new RocketException(String.format("调用getDescriptor后得到未知类型,class[%s], getDescriptorResultClass[%s]",
+            throw new RocketException(String.format("调用getDescriptor后得到未知的Descriptor类型,class[%s], getDescriptorResultClass[%s]",
                     clazz.getName(), getDescriptorResult.getClass().getName()));
         }
     }
