@@ -1,10 +1,16 @@
 package com.rpg.rocket;
 
 
+import com.google.protobuf.Message;
 import com.rpg.rocket.client.RocketClient;
 import com.rpg.rocket.domain.UserProtos;
+import com.rpg.rocket.message.BaseMsgProtos;
+import com.rpg.rocket.protocol.RequestWrapper;
+import com.rpg.rocket.protocol.ResponseWrapper;
 import com.rpg.rocket.protocol.RocketProtocol;
 import com.rpg.rocket.server.RocketServer;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.testng.annotations.BeforeTest;
@@ -50,15 +56,29 @@ public class BaseTest {
         return user.build();
     }
 
-    protected RocketProtocol buildProtocol(int version, RocketProtocol.Phase phase, RocketProtocol.Type type, RocketProtocol.Status status,
-                                         int timeout, UserProtos.User user) {
 
 
-        RocketProtocol.Builder protocolBuilder = RocketProtocol.newBuilder();
-        protocolBuilder.setVersion(version).setPhase(phase).setType(type).setStatus(status).setTimeout(timeout);
-        protocolBuilder.setMessage(user);
+    protected void checkEncodeAndDecodeRequest(int version, RocketProtocol.Phase phase, int timeout, Long userId, Message message) {
 
-        return protocolBuilder.build();
+        RequestWrapper request = new RequestWrapper(version, phase, timeout, userId, message);
+
+        ByteBuf buffer = Unpooled.buffer();
+        request.getProtocol().encode(buffer);
+        RocketProtocol decodeProtocol = RocketProtocol.decode(buffer);
+
+        assertProtocolEquals(request.getProtocol(), decodeProtocol);
+    }
+
+    protected void checkEncodeAndDecodeResponse(int version, RocketProtocol.Phase phase, RocketProtocol.Status status, BaseMsgProtos.ResponseStatus responseStatus,
+                                            String msg, Message message) {
+
+        ResponseWrapper response = new ResponseWrapper(version, phase, status, responseStatus, msg, message);
+
+        ByteBuf buffer = Unpooled.buffer();
+        response.getProtocol().encode(buffer);
+        RocketProtocol decodeProtocol = RocketProtocol.decode(buffer);
+
+        assertProtocolEquals(response.getProtocol(), decodeProtocol);
     }
 
     protected void assertProtocolEquals(RocketProtocol protocol, RocketProtocol decodeProtocol) {
@@ -69,10 +89,13 @@ public class BaseTest {
         assertThat(decodeProtocol.getType(), is(protocol.getType()));
         assertThat(decodeProtocol.getId(), is(protocol.getId()));
         assertThat(decodeProtocol.getTimeout(), is(protocol.getTimeout()));
-        assertThat(decodeProtocol.getMessageTypeLength(), is(protocol.getMessageTypeLength()));
-        assertThat(decodeProtocol.getMessageType(), is(protocol.getMessageType()));
         assertThat(decodeProtocol.getDataLength(), is(protocol.getDataLength()));
         assertThat(true, is(Arrays.equals(protocol.getData(), decodeProtocol.getData())));
+        if(RocketProtocol.Type.REQUEST.equals(protocol.getType())) {
+            assertThat(new RequestWrapper(protocol).getRequestMsg(), is(new RequestWrapper(decodeProtocol).getRequestMsg()));
+        } else {
+            assertThat(new ResponseWrapper(protocol).getResponseMsg(), is(new ResponseWrapper(decodeProtocol).getResponseMsg()));
+        }
     }
 
 }

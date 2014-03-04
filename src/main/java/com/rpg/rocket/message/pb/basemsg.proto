@@ -4,12 +4,16 @@ option java_package = "com.rpg.rocket.message";
 option java_outer_classname = "BaseMsgProtos";
 
 message RequestMsg {
-    optional int64 user_id = 1;
+    required string message_type = 1;
+    required bytes message = 2;
+    optional int64 user_id = 3;
 }
 
 message ResponseMsg {
-    required ResponseStatus status = 1;
-    optional string msg = 2;
+    optional string message_type = 1;
+    optional bytes message = 2;
+    required ResponseStatus status = 3;
+    optional string msg = 4;
 }
 
 enum ResponseStatus {

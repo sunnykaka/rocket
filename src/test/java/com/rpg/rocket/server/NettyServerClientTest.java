@@ -1,6 +1,9 @@
 package com.rpg.rocket.server;
 
 import com.rpg.rocket.BaseTest;
+import com.rpg.rocket.message.BaseMsgProtos;
+import com.rpg.rocket.protocol.RequestWrapper;
+import com.rpg.rocket.protocol.ResponseWrapper;
 import com.rpg.rocket.protocol.RocketProtocol;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -26,13 +29,15 @@ public class NettyServerClientTest extends BaseTest {
         final List<RocketProtocol> clientProtocolList = new LinkedList<>();
         final List<RocketProtocol> serverProtocolList = new CopyOnWriteArrayList<>();
 
-        RocketProtocol protocol1 = buildProtocol(1, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Type.REQUEST, null, 10000, buildUser());
-        RocketProtocol protocol2 = buildProtocol(1, RocketProtocol.Phase.CIPHERTEXT, RocketProtocol.Type.RESPONSE, RocketProtocol.Status.DATA_CORRUPT, 0, buildUser());
-        RocketProtocol protocol3 = buildProtocol(1, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Type.RESPONSE, RocketProtocol.Status.SUCCESS, 0, null);
+        RequestWrapper request1 = new RequestWrapper(1, RocketProtocol.Phase.PLAINTEXT, 10000, 123L, buildUser());
+        ResponseWrapper response2 = new ResponseWrapper(1, RocketProtocol.Phase.CIPHERTEXT, RocketProtocol.Status.DATA_CORRUPT, null, null, null);
+        ResponseWrapper response3 = new ResponseWrapper(1, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.USERNAME_NOT_EXIST, "haha", null);
+        ResponseWrapper response4 = new ResponseWrapper(1, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.SUCCESS, null, buildUser());
 
-        clientProtocolList.add(protocol1);
-        clientProtocolList.add(protocol2);
-        clientProtocolList.add(protocol3);
+        clientProtocolList.add(request1.getProtocol());
+        clientProtocolList.add(response2.getProtocol());
+        clientProtocolList.add(response3.getProtocol());
+        clientProtocolList.add(response4.getProtocol());
 
         //初始化服务器端
         Channel serverChannel = initServer(new ChannelInboundHandlerAdapter() {

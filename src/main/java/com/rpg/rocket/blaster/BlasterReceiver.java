@@ -26,62 +26,62 @@ public class BlasterReceiver {
 
     public void receive(RocketProtocol protocol) throws RocketProtocolException {
 
-        boolean decipher = false;
-
-        if(protocol.getVersion() != 1) {
-            throw new RocketProtocolException(RocketProtocol.Status.INVALID_VERSION, protocol);
-        }
-
-        if(RocketProtocol.Phase.PLAINTEXT.equals(protocol.getPhase())) {
-
-        } else if(RocketProtocol.Phase.CIPHERTEXT.equals(protocol.getPhase())) {
-            decipher = true;
-        } else {
-            throw new RocketProtocolException(RocketProtocol.Status.INVALID_PHASE, protocol);
-        }
-
-        int id = protocol.getId();
-
-        if(decipher) {
-            //TODO decipher
-        }
-
-        Method messageParseMethod = descriptorRegistry.getMessageParseMethod(protocol.getMessageType());
-        if(messageParseMethod == null) {
-            throw new RocketProtocolException(RocketProtocol.Status.UNKNOWN_MESSAGE_TYPE, protocol);
-        }
-        Message message;
-        try {
-            message = (Message)messageParseMethod.invoke(null, protocol.getData());
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RocketProtocolException(RocketProtocol.Status.DATA_CORRUPT, protocol);
-        }
-
-        if(RocketProtocol.Type.REQUEST.equals(protocol.getType())) {
-            long timeout = protocol.getTimeout();
-            if(Clock.isTimeout(timeout)) {
-                // blasterSender.send(timeout);
-                return;
-            }
-
-            MessageRequestHandler messageRequestHandler = messageHandlerRegistry.getMessageRequestHandler(protocol.getMessageType());
-            if(messageRequestHandler == null) {
-                log.warn("接收到类型为[{}]的消息,但是没有对应的请求处理器,消息内容:{}", protocol.getMessageType(), protocol.toString());
-                return;
-            }
-
-            Message result = messageRequestHandler.handleRequest(message);
-            if(result == null) return;
-
-
-            // blasterSender.send(result);
-
-
-        } else {
-            RocketProtocol.Status status = protocol.getStatus();
-
-
-        }
+//        boolean decipher = false;
+//
+//        if(protocol.getVersion() != 1) {
+//            throw new RocketProtocolException(RocketProtocol.Status.INVALID_VERSION, protocol);
+//        }
+//
+//        if(RocketProtocol.Phase.PLAINTEXT.equals(protocol.getPhase())) {
+//
+//        } else if(RocketProtocol.Phase.CIPHERTEXT.equals(protocol.getPhase())) {
+//            decipher = true;
+//        } else {
+//            throw new RocketProtocolException(RocketProtocol.Status.INVALID_PHASE, protocol);
+//        }
+//
+//        int id = protocol.getId();
+//
+//        if(decipher) {
+//            //TODO decipher
+//        }
+//
+//        Method messageParseMethod = descriptorRegistry.getMessageParseMethod(protocol.getMessageType());
+//        if(messageParseMethod == null) {
+//            throw new RocketProtocolException(RocketProtocol.Status.UNKNOWN_MESSAGE_TYPE, protocol);
+//        }
+//        Message message;
+//        try {
+//            message = (Message)messageParseMethod.invoke(null, protocol.getData());
+//        } catch (IllegalAccessException | InvocationTargetException e) {
+//            throw new RocketProtocolException(RocketProtocol.Status.DATA_CORRUPT, protocol);
+//        }
+//
+//        if(RocketProtocol.Type.REQUEST.equals(protocol.getType())) {
+//            long timeout = protocol.getTimeout();
+//            if(Clock.isTimeout(timeout)) {
+//                // blasterSender.send(timeout);
+//                return;
+//            }
+//
+//            MessageRequestHandler messageRequestHandler = messageHandlerRegistry.getMessageRequestHandler(protocol.getMessageType());
+//            if(messageRequestHandler == null) {
+//                log.warn("接收到类型为[{}]的消息,但是没有对应的请求处理器,消息内容:{}", protocol.getMessageType(), protocol.toString());
+//                return;
+//            }
+//
+//            Message result = messageRequestHandler.handleRequest(message);
+//            if(result == null) return;
+//
+//
+//            // blasterSender.send(result);
+//
+//
+//        } else {
+//            RocketProtocol.Status status = protocol.getStatus();
+//
+//
+//        }
 
 
     }

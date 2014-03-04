@@ -14,13 +14,13 @@ public final class BaseMsgProtos {
   public enum ResponseStatus
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
-     * <code>SUCCESS = 0;</code>
+     * <code>SUCCESS = 1;</code>
      */
-    SUCCESS(0, 0),
+    SUCCESS(0, 1),
     /**
-     * <code>UNKNOWN_ERROR = 1;</code>
+     * <code>UNKNOWN_ERROR = 2;</code>
      */
-    UNKNOWN_ERROR(1, 1),
+    UNKNOWN_ERROR(1, 2),
     /**
      * <code>USERNAME_NOT_EXIST = 100;</code>
      */
@@ -32,13 +32,13 @@ public final class BaseMsgProtos {
     ;
 
     /**
-     * <code>SUCCESS = 0;</code>
+     * <code>SUCCESS = 1;</code>
      */
-    public static final int SUCCESS_VALUE = 0;
+    public static final int SUCCESS_VALUE = 1;
     /**
-     * <code>UNKNOWN_ERROR = 1;</code>
+     * <code>UNKNOWN_ERROR = 2;</code>
      */
-    public static final int UNKNOWN_ERROR_VALUE = 1;
+    public static final int UNKNOWN_ERROR_VALUE = 2;
     /**
      * <code>USERNAME_NOT_EXIST = 100;</code>
      */
@@ -53,8 +53,8 @@ public final class BaseMsgProtos {
 
     public static ResponseStatus valueOf(int value) {
       switch (value) {
-        case 0: return SUCCESS;
-        case 1: return UNKNOWN_ERROR;
+        case 1: return SUCCESS;
+        case 2: return UNKNOWN_ERROR;
         case 100: return USERNAME_NOT_EXIST;
         case 101: return PASSWORD_INCORRECT;
         default: return null;
@@ -111,13 +111,38 @@ public final class BaseMsgProtos {
   public interface RequestMsgOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // optional int64 user_id = 1;
+    // required string message_type = 1;
     /**
-     * <code>optional int64 user_id = 1;</code>
+     * <code>required string message_type = 1;</code>
+     */
+    boolean hasMessageType();
+    /**
+     * <code>required string message_type = 1;</code>
+     */
+    java.lang.String getMessageType();
+    /**
+     * <code>required string message_type = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getMessageTypeBytes();
+
+    // required bytes message = 2;
+    /**
+     * <code>required bytes message = 2;</code>
+     */
+    boolean hasMessage();
+    /**
+     * <code>required bytes message = 2;</code>
+     */
+    com.google.protobuf.ByteString getMessage();
+
+    // optional int64 user_id = 3;
+    /**
+     * <code>optional int64 user_id = 3;</code>
      */
     boolean hasUserId();
     /**
-     * <code>optional int64 user_id = 1;</code>
+     * <code>optional int64 user_id = 3;</code>
      */
     long getUserId();
   }
@@ -172,8 +197,18 @@ public final class BaseMsgProtos {
               }
               break;
             }
-            case 8: {
+            case 10: {
               bitField0_ |= 0x00000001;
+              messageType_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              message_ = input.readBytes();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
               userId_ = input.readInt64();
               break;
             }
@@ -217,23 +252,84 @@ public final class BaseMsgProtos {
     }
 
     private int bitField0_;
-    // optional int64 user_id = 1;
-    public static final int USER_ID_FIELD_NUMBER = 1;
-    private long userId_;
+    // required string message_type = 1;
+    public static final int MESSAGE_TYPE_FIELD_NUMBER = 1;
+    private java.lang.Object messageType_;
     /**
-     * <code>optional int64 user_id = 1;</code>
+     * <code>required string message_type = 1;</code>
      */
-    public boolean hasUserId() {
+    public boolean hasMessageType() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional int64 user_id = 1;</code>
+     * <code>required string message_type = 1;</code>
+     */
+    public java.lang.String getMessageType() {
+      java.lang.Object ref = messageType_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          messageType_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string message_type = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getMessageTypeBytes() {
+      java.lang.Object ref = messageType_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        messageType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // required bytes message = 2;
+    public static final int MESSAGE_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString message_;
+    /**
+     * <code>required bytes message = 2;</code>
+     */
+    public boolean hasMessage() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required bytes message = 2;</code>
+     */
+    public com.google.protobuf.ByteString getMessage() {
+      return message_;
+    }
+
+    // optional int64 user_id = 3;
+    public static final int USER_ID_FIELD_NUMBER = 3;
+    private long userId_;
+    /**
+     * <code>optional int64 user_id = 3;</code>
+     */
+    public boolean hasUserId() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional int64 user_id = 3;</code>
      */
     public long getUserId() {
       return userId_;
     }
 
     private void initFields() {
+      messageType_ = "";
+      message_ = com.google.protobuf.ByteString.EMPTY;
       userId_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
@@ -241,6 +337,14 @@ public final class BaseMsgProtos {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
+      if (!hasMessageType()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasMessage()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -249,7 +353,13 @@ public final class BaseMsgProtos {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeInt64(1, userId_);
+        output.writeBytes(1, getMessageTypeBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, message_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt64(3, userId_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -262,7 +372,15 @@ public final class BaseMsgProtos {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(1, userId_);
+          .computeBytesSize(1, getMessageTypeBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, message_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, userId_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -380,8 +498,12 @@ public final class BaseMsgProtos {
 
       public Builder clear() {
         super.clear();
-        userId_ = 0L;
+        messageType_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
+        message_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        userId_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -413,6 +535,14 @@ public final class BaseMsgProtos {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
+        result.messageType_ = messageType_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.message_ = message_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
         result.userId_ = userId_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -430,6 +560,14 @@ public final class BaseMsgProtos {
 
       public Builder mergeFrom(com.rpg.rocket.message.BaseMsgProtos.RequestMsg other) {
         if (other == com.rpg.rocket.message.BaseMsgProtos.RequestMsg.getDefaultInstance()) return this;
+        if (other.hasMessageType()) {
+          bitField0_ |= 0x00000001;
+          messageType_ = other.messageType_;
+          onChanged();
+        }
+        if (other.hasMessage()) {
+          setMessage(other.getMessage());
+        }
         if (other.hasUserId()) {
           setUserId(other.getUserId());
         }
@@ -438,6 +576,14 @@ public final class BaseMsgProtos {
       }
 
       public final boolean isInitialized() {
+        if (!hasMessageType()) {
+          
+          return false;
+        }
+        if (!hasMessage()) {
+          
+          return false;
+        }
         return true;
       }
 
@@ -460,34 +606,144 @@ public final class BaseMsgProtos {
       }
       private int bitField0_;
 
-      // optional int64 user_id = 1;
-      private long userId_ ;
+      // required string message_type = 1;
+      private java.lang.Object messageType_ = "";
       /**
-       * <code>optional int64 user_id = 1;</code>
+       * <code>required string message_type = 1;</code>
        */
-      public boolean hasUserId() {
+      public boolean hasMessageType() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional int64 user_id = 1;</code>
+       * <code>required string message_type = 1;</code>
+       */
+      public java.lang.String getMessageType() {
+        java.lang.Object ref = messageType_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          messageType_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string message_type = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getMessageTypeBytes() {
+        java.lang.Object ref = messageType_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          messageType_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string message_type = 1;</code>
+       */
+      public Builder setMessageType(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        messageType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string message_type = 1;</code>
+       */
+      public Builder clearMessageType() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        messageType_ = getDefaultInstance().getMessageType();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string message_type = 1;</code>
+       */
+      public Builder setMessageTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        messageType_ = value;
+        onChanged();
+        return this;
+      }
+
+      // required bytes message = 2;
+      private com.google.protobuf.ByteString message_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes message = 2;</code>
+       */
+      public boolean hasMessage() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required bytes message = 2;</code>
+       */
+      public com.google.protobuf.ByteString getMessage() {
+        return message_;
+      }
+      /**
+       * <code>required bytes message = 2;</code>
+       */
+      public Builder setMessage(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        message_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes message = 2;</code>
+       */
+      public Builder clearMessage() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        message_ = getDefaultInstance().getMessage();
+        onChanged();
+        return this;
+      }
+
+      // optional int64 user_id = 3;
+      private long userId_ ;
+      /**
+       * <code>optional int64 user_id = 3;</code>
+       */
+      public boolean hasUserId() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional int64 user_id = 3;</code>
        */
       public long getUserId() {
         return userId_;
       }
       /**
-       * <code>optional int64 user_id = 1;</code>
+       * <code>optional int64 user_id = 3;</code>
        */
       public Builder setUserId(long value) {
-        bitField0_ |= 0x00000001;
+        bitField0_ |= 0x00000004;
         userId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int64 user_id = 1;</code>
+       * <code>optional int64 user_id = 3;</code>
        */
       public Builder clearUserId() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000004);
         userId_ = 0L;
         onChanged();
         return this;
@@ -507,27 +763,52 @@ public final class BaseMsgProtos {
   public interface ResponseMsgOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // required .rocket.message.pb.ResponseStatus status = 1;
+    // optional string message_type = 1;
     /**
-     * <code>required .rocket.message.pb.ResponseStatus status = 1;</code>
+     * <code>optional string message_type = 1;</code>
+     */
+    boolean hasMessageType();
+    /**
+     * <code>optional string message_type = 1;</code>
+     */
+    java.lang.String getMessageType();
+    /**
+     * <code>optional string message_type = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getMessageTypeBytes();
+
+    // optional bytes message = 2;
+    /**
+     * <code>optional bytes message = 2;</code>
+     */
+    boolean hasMessage();
+    /**
+     * <code>optional bytes message = 2;</code>
+     */
+    com.google.protobuf.ByteString getMessage();
+
+    // required .rocket.message.pb.ResponseStatus status = 3;
+    /**
+     * <code>required .rocket.message.pb.ResponseStatus status = 3;</code>
      */
     boolean hasStatus();
     /**
-     * <code>required .rocket.message.pb.ResponseStatus status = 1;</code>
+     * <code>required .rocket.message.pb.ResponseStatus status = 3;</code>
      */
     com.rpg.rocket.message.BaseMsgProtos.ResponseStatus getStatus();
 
-    // optional string msg = 2;
+    // optional string msg = 4;
     /**
-     * <code>optional string msg = 2;</code>
+     * <code>optional string msg = 4;</code>
      */
     boolean hasMsg();
     /**
-     * <code>optional string msg = 2;</code>
+     * <code>optional string msg = 4;</code>
      */
     java.lang.String getMsg();
     /**
-     * <code>optional string msg = 2;</code>
+     * <code>optional string msg = 4;</code>
      */
     com.google.protobuf.ByteString
         getMsgBytes();
@@ -583,19 +864,29 @@ public final class BaseMsgProtos {
               }
               break;
             }
-            case 8: {
-              int rawValue = input.readEnum();
-              com.rpg.rocket.message.BaseMsgProtos.ResponseStatus value = com.rpg.rocket.message.BaseMsgProtos.ResponseStatus.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(1, rawValue);
-              } else {
-                bitField0_ |= 0x00000001;
-                status_ = value;
-              }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              messageType_ = input.readBytes();
               break;
             }
             case 18: {
               bitField0_ |= 0x00000002;
+              message_ = input.readBytes();
+              break;
+            }
+            case 24: {
+              int rawValue = input.readEnum();
+              com.rpg.rocket.message.BaseMsgProtos.ResponseStatus value = com.rpg.rocket.message.BaseMsgProtos.ResponseStatus.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(3, rawValue);
+              } else {
+                bitField0_ |= 0x00000004;
+                status_ = value;
+              }
+              break;
+            }
+            case 34: {
+              bitField0_ |= 0x00000008;
               msg_ = input.readBytes();
               break;
             }
@@ -639,33 +930,92 @@ public final class BaseMsgProtos {
     }
 
     private int bitField0_;
-    // required .rocket.message.pb.ResponseStatus status = 1;
-    public static final int STATUS_FIELD_NUMBER = 1;
-    private com.rpg.rocket.message.BaseMsgProtos.ResponseStatus status_;
+    // optional string message_type = 1;
+    public static final int MESSAGE_TYPE_FIELD_NUMBER = 1;
+    private java.lang.Object messageType_;
     /**
-     * <code>required .rocket.message.pb.ResponseStatus status = 1;</code>
+     * <code>optional string message_type = 1;</code>
      */
-    public boolean hasStatus() {
+    public boolean hasMessageType() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required .rocket.message.pb.ResponseStatus status = 1;</code>
+     * <code>optional string message_type = 1;</code>
+     */
+    public java.lang.String getMessageType() {
+      java.lang.Object ref = messageType_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          messageType_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string message_type = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getMessageTypeBytes() {
+      java.lang.Object ref = messageType_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        messageType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // optional bytes message = 2;
+    public static final int MESSAGE_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString message_;
+    /**
+     * <code>optional bytes message = 2;</code>
+     */
+    public boolean hasMessage() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional bytes message = 2;</code>
+     */
+    public com.google.protobuf.ByteString getMessage() {
+      return message_;
+    }
+
+    // required .rocket.message.pb.ResponseStatus status = 3;
+    public static final int STATUS_FIELD_NUMBER = 3;
+    private com.rpg.rocket.message.BaseMsgProtos.ResponseStatus status_;
+    /**
+     * <code>required .rocket.message.pb.ResponseStatus status = 3;</code>
+     */
+    public boolean hasStatus() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required .rocket.message.pb.ResponseStatus status = 3;</code>
      */
     public com.rpg.rocket.message.BaseMsgProtos.ResponseStatus getStatus() {
       return status_;
     }
 
-    // optional string msg = 2;
-    public static final int MSG_FIELD_NUMBER = 2;
+    // optional string msg = 4;
+    public static final int MSG_FIELD_NUMBER = 4;
     private java.lang.Object msg_;
     /**
-     * <code>optional string msg = 2;</code>
+     * <code>optional string msg = 4;</code>
      */
     public boolean hasMsg() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>optional string msg = 2;</code>
+     * <code>optional string msg = 4;</code>
      */
     public java.lang.String getMsg() {
       java.lang.Object ref = msg_;
@@ -682,7 +1032,7 @@ public final class BaseMsgProtos {
       }
     }
     /**
-     * <code>optional string msg = 2;</code>
+     * <code>optional string msg = 4;</code>
      */
     public com.google.protobuf.ByteString
         getMsgBytes() {
@@ -699,6 +1049,8 @@ public final class BaseMsgProtos {
     }
 
     private void initFields() {
+      messageType_ = "";
+      message_ = com.google.protobuf.ByteString.EMPTY;
       status_ = com.rpg.rocket.message.BaseMsgProtos.ResponseStatus.SUCCESS;
       msg_ = "";
     }
@@ -719,10 +1071,16 @@ public final class BaseMsgProtos {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeEnum(1, status_.getNumber());
+        output.writeBytes(1, getMessageTypeBytes());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getMsgBytes());
+        output.writeBytes(2, message_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeEnum(3, status_.getNumber());
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBytes(4, getMsgBytes());
       }
       getUnknownFields().writeTo(output);
     }
@@ -735,11 +1093,19 @@ public final class BaseMsgProtos {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(1, status_.getNumber());
+          .computeBytesSize(1, getMessageTypeBytes());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getMsgBytes());
+          .computeBytesSize(2, message_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(3, status_.getNumber());
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(4, getMsgBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -857,10 +1223,14 @@ public final class BaseMsgProtos {
 
       public Builder clear() {
         super.clear();
-        status_ = com.rpg.rocket.message.BaseMsgProtos.ResponseStatus.SUCCESS;
+        messageType_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
-        msg_ = "";
+        message_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000002);
+        status_ = com.rpg.rocket.message.BaseMsgProtos.ResponseStatus.SUCCESS;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        msg_ = "";
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -892,9 +1262,17 @@ public final class BaseMsgProtos {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.status_ = status_;
+        result.messageType_ = messageType_;
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
+        }
+        result.message_ = message_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.status_ = status_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
         }
         result.msg_ = msg_;
         result.bitField0_ = to_bitField0_;
@@ -913,11 +1291,19 @@ public final class BaseMsgProtos {
 
       public Builder mergeFrom(com.rpg.rocket.message.BaseMsgProtos.ResponseMsg other) {
         if (other == com.rpg.rocket.message.BaseMsgProtos.ResponseMsg.getDefaultInstance()) return this;
+        if (other.hasMessageType()) {
+          bitField0_ |= 0x00000001;
+          messageType_ = other.messageType_;
+          onChanged();
+        }
+        if (other.hasMessage()) {
+          setMessage(other.getMessage());
+        }
         if (other.hasStatus()) {
           setStatus(other.getStatus());
         }
         if (other.hasMsg()) {
-          bitField0_ |= 0x00000002;
+          bitField0_ |= 0x00000008;
           msg_ = other.msg_;
           onChanged();
         }
@@ -952,52 +1338,162 @@ public final class BaseMsgProtos {
       }
       private int bitField0_;
 
-      // required .rocket.message.pb.ResponseStatus status = 1;
-      private com.rpg.rocket.message.BaseMsgProtos.ResponseStatus status_ = com.rpg.rocket.message.BaseMsgProtos.ResponseStatus.SUCCESS;
+      // optional string message_type = 1;
+      private java.lang.Object messageType_ = "";
       /**
-       * <code>required .rocket.message.pb.ResponseStatus status = 1;</code>
+       * <code>optional string message_type = 1;</code>
        */
-      public boolean hasStatus() {
+      public boolean hasMessageType() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required .rocket.message.pb.ResponseStatus status = 1;</code>
+       * <code>optional string message_type = 1;</code>
+       */
+      public java.lang.String getMessageType() {
+        java.lang.Object ref = messageType_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          messageType_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string message_type = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getMessageTypeBytes() {
+        java.lang.Object ref = messageType_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          messageType_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string message_type = 1;</code>
+       */
+      public Builder setMessageType(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        messageType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string message_type = 1;</code>
+       */
+      public Builder clearMessageType() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        messageType_ = getDefaultInstance().getMessageType();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string message_type = 1;</code>
+       */
+      public Builder setMessageTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        messageType_ = value;
+        onChanged();
+        return this;
+      }
+
+      // optional bytes message = 2;
+      private com.google.protobuf.ByteString message_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes message = 2;</code>
+       */
+      public boolean hasMessage() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional bytes message = 2;</code>
+       */
+      public com.google.protobuf.ByteString getMessage() {
+        return message_;
+      }
+      /**
+       * <code>optional bytes message = 2;</code>
+       */
+      public Builder setMessage(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        message_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes message = 2;</code>
+       */
+      public Builder clearMessage() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        message_ = getDefaultInstance().getMessage();
+        onChanged();
+        return this;
+      }
+
+      // required .rocket.message.pb.ResponseStatus status = 3;
+      private com.rpg.rocket.message.BaseMsgProtos.ResponseStatus status_ = com.rpg.rocket.message.BaseMsgProtos.ResponseStatus.SUCCESS;
+      /**
+       * <code>required .rocket.message.pb.ResponseStatus status = 3;</code>
+       */
+      public boolean hasStatus() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required .rocket.message.pb.ResponseStatus status = 3;</code>
        */
       public com.rpg.rocket.message.BaseMsgProtos.ResponseStatus getStatus() {
         return status_;
       }
       /**
-       * <code>required .rocket.message.pb.ResponseStatus status = 1;</code>
+       * <code>required .rocket.message.pb.ResponseStatus status = 3;</code>
        */
       public Builder setStatus(com.rpg.rocket.message.BaseMsgProtos.ResponseStatus value) {
         if (value == null) {
           throw new NullPointerException();
         }
-        bitField0_ |= 0x00000001;
+        bitField0_ |= 0x00000004;
         status_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required .rocket.message.pb.ResponseStatus status = 1;</code>
+       * <code>required .rocket.message.pb.ResponseStatus status = 3;</code>
        */
       public Builder clearStatus() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000004);
         status_ = com.rpg.rocket.message.BaseMsgProtos.ResponseStatus.SUCCESS;
         onChanged();
         return this;
       }
 
-      // optional string msg = 2;
+      // optional string msg = 4;
       private java.lang.Object msg_ = "";
       /**
-       * <code>optional string msg = 2;</code>
+       * <code>optional string msg = 4;</code>
        */
       public boolean hasMsg() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
+        return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>optional string msg = 2;</code>
+       * <code>optional string msg = 4;</code>
        */
       public java.lang.String getMsg() {
         java.lang.Object ref = msg_;
@@ -1011,7 +1507,7 @@ public final class BaseMsgProtos {
         }
       }
       /**
-       * <code>optional string msg = 2;</code>
+       * <code>optional string msg = 4;</code>
        */
       public com.google.protobuf.ByteString
           getMsgBytes() {
@@ -1027,36 +1523,36 @@ public final class BaseMsgProtos {
         }
       }
       /**
-       * <code>optional string msg = 2;</code>
+       * <code>optional string msg = 4;</code>
        */
       public Builder setMsg(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000008;
         msg_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string msg = 2;</code>
+       * <code>optional string msg = 4;</code>
        */
       public Builder clearMsg() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000008);
         msg_ = getDefaultInstance().getMsg();
         onChanged();
         return this;
       }
       /**
-       * <code>optional string msg = 2;</code>
+       * <code>optional string msg = 4;</code>
        */
       public Builder setMsgBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000008;
         msg_ = value;
         onChanged();
         return this;
@@ -1093,13 +1589,15 @@ public final class BaseMsgProtos {
   static {
     java.lang.String[] descriptorData = {
       "\n\037rocket/message/pb/basemsg.proto\022\021rocke" +
-      "t.message.pb\"\035\n\nRequestMsg\022\017\n\007user_id\030\001 " +
-      "\001(\003\"M\n\013ResponseMsg\0221\n\006status\030\001 \002(\0162!.roc" +
-      "ket.message.pb.ResponseStatus\022\013\n\003msg\030\002 \001" +
-      "(\t*`\n\016ResponseStatus\022\013\n\007SUCCESS\020\000\022\021\n\rUNK" +
-      "NOWN_ERROR\020\001\022\026\n\022USERNAME_NOT_EXIST\020d\022\026\n\022" +
-      "PASSWORD_INCORRECT\020eB\'\n\026com.rpg.rocket.m" +
-      "essageB\rBaseMsgProtos"
+      "t.message.pb\"D\n\nRequestMsg\022\024\n\014message_ty" +
+      "pe\030\001 \002(\t\022\017\n\007message\030\002 \002(\014\022\017\n\007user_id\030\003 \001" +
+      "(\003\"t\n\013ResponseMsg\022\024\n\014message_type\030\001 \001(\t\022" +
+      "\017\n\007message\030\002 \001(\014\0221\n\006status\030\003 \002(\0162!.rocke" +
+      "t.message.pb.ResponseStatus\022\013\n\003msg\030\004 \001(\t" +
+      "*`\n\016ResponseStatus\022\013\n\007SUCCESS\020\001\022\021\n\rUNKNO" +
+      "WN_ERROR\020\002\022\026\n\022USERNAME_NOT_EXIST\020d\022\026\n\022PA" +
+      "SSWORD_INCORRECT\020eB\'\n\026com.rpg.rocket.mes" +
+      "sageB\rBaseMsgProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1111,13 +1609,13 @@ public final class BaseMsgProtos {
           internal_static_rocket_message_pb_RequestMsg_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_rocket_message_pb_RequestMsg_descriptor,
-              new java.lang.String[] { "UserId", });
+              new java.lang.String[] { "MessageType", "Message", "UserId", });
           internal_static_rocket_message_pb_ResponseMsg_descriptor =
             getDescriptor().getMessageTypes().get(1);
           internal_static_rocket_message_pb_ResponseMsg_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_rocket_message_pb_ResponseMsg_descriptor,
-              new java.lang.String[] { "Status", "Msg", });
+              new java.lang.String[] { "MessageType", "Message", "Status", "Msg", });
           return null;
         }
       };

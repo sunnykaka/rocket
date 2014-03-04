@@ -6,6 +6,7 @@ import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageLite;
 import com.rpg.rocket.exception.RocketProtocolException;
+import com.rpg.rocket.message.BaseMsgProtos;
 import com.rpg.rocket.util.Clock;
 import com.rpg.rocket.util.IdGenerator;
 import io.netty.buffer.ByteBuf;
@@ -19,21 +20,19 @@ import java.util.Arrays;
  */
 public class RocketProtocol {
 
-    public static final int HEAD_LENGTH = 1 + 1 + 1 + 1 + 4 + 8 + 2 + 4;
+    public static final int HEAD_LENGTH = 1 + 1 + 1 + 1 + 4 + 8 + 4;
 
 
     private RocketProtocol() {}
 
-    private RocketProtocol(int version, Phase phase, Status status, Type type, int id, long timeout, int messageTypeLength, int dataLength, String messageType, byte[] data) {
+    private RocketProtocol(int version, Phase phase, Status status, Type type, int id, long timeout, int dataLength, byte[] data) {
         this.version = version;
         this.phase = phase;
         this.status = status;
         this.type = type;
         this.id = id;
         this.timeout = timeout;
-        this.messageTypeLength = messageTypeLength;
         this.dataLength = dataLength;
-        this.messageType = messageType;
         this.data = data;
     }
 
@@ -55,14 +54,8 @@ public class RocketProtocol {
     /** 超时时间,unix time 8byte [only request] **/
     private long timeout;
 
-    /** 消息类型名称长度 2byte **/
-    private int messageTypeLength;
-
     /** 消息长度 4byte **/
     private int dataLength;
-
-    /** 消息类型名称长度 **/
-    private String messageType;
 
     /** 消息 **/
     private byte[] data;
@@ -77,23 +70,18 @@ public class RocketProtocol {
         Type type = Type.valueOf(UnsignedBytes.toInt(in.readByte()));
         int id = in.readInt();
         long timeout = in.readLong();
-        int messageTypeLength = in.readShort();
         int dataLength = in.readInt();
-        String messageType = null;
         byte[] data = null;
         if(dataLength > 0) {
-            if(in.readableBytes() < dataLength + messageTypeLength) {
+            if(in.readableBytes() < dataLength) {
                 //数据没有读取完整
                 in.readerIndex(originReaderIndex);
                 return null;
             }
-            byte[] messageTypeBytes = new byte[messageTypeLength];
-            in.readBytes(messageTypeBytes, 0, messageTypeLength);
-            messageType = new String(messageTypeBytes, Charsets.UTF_8);
             data = new byte[dataLength];
             in.readBytes(data, 0, dataLength);
         }
-        RocketProtocol protocol = new RocketProtocol(version, phase, status, type, id, timeout, messageTypeLength, dataLength, messageType, data);
+        RocketProtocol protocol = new RocketProtocol(version, phase, status, type, id, timeout, dataLength, data);
         return protocol;
     }
 
@@ -101,14 +89,10 @@ public class RocketProtocol {
         out.writeByte((byte)version);
         out.writeByte((byte)phase.value);
         out.writeByte(status == null ? 0 : (byte)status.value);
-        out.writeByte((byte)type.value);
+        out.writeByte((byte) type.value);
         out.writeInt(id);
         out.writeLong(timeout);
-        out.writeShort(messageTypeLength);
         out.writeInt(dataLength);
-        if(messageTypeLength > 0) {
-            out.writeBytes(messageType.getBytes(Charsets.UTF_8), 0, messageTypeLength);
-        }
         if(dataLength > 0) {
             out.writeBytes(data, 0, dataLength);
         }
@@ -138,16 +122,8 @@ public class RocketProtocol {
         return timeout;
     }
 
-    public int getMessageTypeLength() {
-        return messageTypeLength;
-    }
-
     public int getDataLength() {
         return dataLength;
-    }
-
-    public String getMessageType() {
-        return messageType;
     }
 
     public byte[] getData() {
@@ -263,9 +239,7 @@ public class RocketProtocol {
                 ", type=" + type +
                 ", id=" + id +
                 ", timeout=" + timeout +
-                ", messageTypeLength=" + messageTypeLength +
                 ", dataLength=" + dataLength +
-                ", messageType='" + messageType + '\'' +
                 '}';
     }
 
@@ -312,16 +286,26 @@ public class RocketProtocol {
             return this;
         }
 
-        public Builder setMessage(Message message) {
-            if(message != null) {
-                String messageType = message.getDescriptorForType().getFullName();
-                byte[] data = message.toByteArray();
-                if(protocol.messageType != null || protocol.messageTypeLength != 0 ||
-                        protocol.data != null || protocol.dataLength != 0) {
-                    throw new RocketProtocolException("创建RocketProtocol失败,为protocol添加message的时候发现内部data或messageType不为空");
-                }
-                protocol.messageType = messageType;
-                protocol.messageTypeLength = messageType.getBytes(Charsets.UTF_8).length;
+        public Builder setMessage(BaseMsgProtos.RequestMsg requestMsg) {
+            if(protocol.data != null || protocol.dataLength != 0) {
+                throw new RocketProtocolException("创建RocketProtocol失败,为protocol添加message的时候发现内部data或messageType不为空");
+            }
+            protocol.type = Type.REQUEST;
+            if(requestMsg != null) {
+                byte[] data = requestMsg.toByteArray();
+                protocol.data = data;
+                protocol.dataLength = data.length;
+            }
+            return this;
+        }
+
+        public Builder setMessage(BaseMsgProtos.ResponseMsg responseMsg) {
+            if(protocol.data != null || protocol.dataLength != 0) {
+                throw new RocketProtocolException("创建RocketProtocol失败,为protocol添加message的时候发现内部data或messageType不为空");
+            }
+            protocol.type = Type.RESPONSE;
+            if(responseMsg != null) {
+                byte[] data = responseMsg.toByteArray();
                 protocol.data = data;
                 protocol.dataLength = data.length;
             }
