@@ -11,6 +11,8 @@ import com.rpg.rocket.util.IdGenerator;
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
+
 /**
  * User: liubin
  * Date: 14-2-19
@@ -18,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 public class RocketProtocol {
 
     public static final int HEAD_LENGTH = 1 + 1 + 1 + 1 + 4 + 8 + 2 + 4;
+
 
     private RocketProtocol() {}
 
@@ -181,19 +184,27 @@ public class RocketProtocol {
 
     public enum Status {
 
+        /** 成功 **/
         SUCCESS(1),
 
+        /** 解密失败 **/
         DECIPHER_FAILED(2),
 
+        /** 数据损坏 **/
         DATA_CORRUPT(3),
 
-        OTHER(4),
+        /** 不支持的版本号 **/
+        INVALID_VERSION(4),
 
-        INVALID_VERSION(5),
+        /** 不支持的协议阶段 **/
+        INVALID_PHASE(5),
 
-        INVALID_PHASE(6),
+        /** 未知的消息类型 **/
+        UNKNOWN_MESSAGE_TYPE(6),
 
-        UNKNOWN_MESSAGE_TYPE(7);
+
+        /** 其他错误 **/
+        OTHER(999);
 
 
 
@@ -241,6 +252,21 @@ public class RocketProtocol {
             return null;
         }
 
+    }
+
+    @Override
+    public String toString() {
+        return "RocketProtocol{" +
+                "version=" + version +
+                ", phase=" + phase +
+                ", status=" + status +
+                ", type=" + type +
+                ", id=" + id +
+                ", timeout=" + timeout +
+                ", messageTypeLength=" + messageTypeLength +
+                ", dataLength=" + dataLength +
+                ", messageType='" + messageType + '\'' +
+                '}';
     }
 
     public static Builder newBuilder() {

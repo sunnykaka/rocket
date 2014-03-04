@@ -1,5 +1,7 @@
 package com.rpg.rocket.client;
 
+import com.rpg.rocket.blaster.registry.MessageHandlerRegistry;
+import com.rpg.rocket.pb.DescriptorRegistry;
 import com.rpg.rocket.protocol.RocketProtocolDecoder;
 import com.rpg.rocket.protocol.RocketProtocolEncoder;
 import io.netty.bootstrap.Bootstrap;
@@ -14,6 +16,15 @@ public class RocketClient {
 
     private static final Logger log = LoggerFactory.getLogger(RocketClient.class);
 
+
+    public RocketClient() {
+        init();
+    }
+
+    private void init() {
+        DescriptorRegistry.getInstance().init();
+        MessageHandlerRegistry.getInstance().init();
+    }
 
     public static void main(String[] args) throws Exception {
 //        String host = args[0];

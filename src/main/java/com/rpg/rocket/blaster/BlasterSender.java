@@ -1,6 +1,5 @@
 package com.rpg.rocket.blaster;
 
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.rpg.rocket.blaster.registry.MessageHandlerRegistry;
 import com.rpg.rocket.exception.RocketProtocolException;
@@ -17,9 +16,9 @@ import java.lang.reflect.Method;
  * User: liubin
  * Date: 14-3-3
  */
-public class BlasterReceiver {
+public class BlasterSender {
 
-    private static final Logger log = LoggerFactory.getLogger(BlasterReceiver.class);
+    private static final Logger log = LoggerFactory.getLogger(BlasterSender.class);
 
     private DescriptorRegistry descriptorRegistry = DescriptorRegistry.getInstance();
     private MessageHandlerRegistry messageHandlerRegistry = MessageHandlerRegistry.getInstance();
@@ -60,7 +59,7 @@ public class BlasterReceiver {
         if(RocketProtocol.Type.REQUEST.equals(protocol.getType())) {
             long timeout = protocol.getTimeout();
             if(Clock.isTimeout(timeout)) {
-                // blasterSender.send(timeout);
+                //已经超时,不执行请求
                 return;
             }
 
@@ -72,9 +71,16 @@ public class BlasterReceiver {
 
             Message result = messageRequestHandler.handleRequest(message);
             if(result == null) return;
+            if(Clock.isTimeout(timeout)) {
+                //已经超时,不返回响应
+                return;
+            } else {
+                RocketProtocol.Builder responseProtocol = RocketProtocol.newBuilder();
+                responseProtocol.setType(RocketProtocol.Type.RESPONSE);
 
+                // blasterSender.sendResponse(result);
+            }
 
-            // blasterSender.send(result);
 
 
         } else {

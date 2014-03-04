@@ -1,5 +1,7 @@
 package com.rpg.rocket.server;
 
+import com.rpg.rocket.blaster.registry.MessageHandlerRegistry;
+import com.rpg.rocket.pb.DescriptorRegistry;
 import com.rpg.rocket.protocol.RocketProtocolDecoder;
 import com.rpg.rocket.protocol.RocketProtocolEncoder;
 import io.netty.bootstrap.ServerBootstrap;
@@ -22,6 +24,8 @@ public class RocketServer {
 
     public RocketServer(int port) {
         this.port = port;
+
+        init();
     }
 
     public Channel accept(final ServerBootstrap b) throws InterruptedException{
@@ -75,12 +79,12 @@ public class RocketServer {
         }
         RocketServer rocketServer = new RocketServer(port);
 
-        rocketServer.init();
         rocketServer.accept();
     }
 
     private void init() {
-        
+        DescriptorRegistry.getInstance().init();
+        MessageHandlerRegistry.getInstance().init();
     }
 
 }

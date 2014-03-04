@@ -10,4 +10,9 @@ public class Clock {
     public static long nowInMillisecond() {
         return System.currentTimeMillis();
     }
+
+    public static boolean isTimeout(long timeout) {
+        if(timeout <= 0) return false;
+        return timeout < nowInMillisecond();
+    }
 }

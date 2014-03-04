@@ -21,7 +21,6 @@ public class DescriptorRegistry {
 
     private static final DescriptorRegistry instance = new DescriptorRegistry();
     private DescriptorRegistry() {
-        init();
     }
     public static final DescriptorRegistry getInstance() {
         return instance;
@@ -32,7 +31,7 @@ public class DescriptorRegistry {
     private Map<String, Class<? extends Message>> pbNameToClassMap = new HashMap<>();
     private Map<String, Method> pbNameToParseMethodMap = new HashMap<>();
 
-    private void init() {
+    public void init() {
         if(initialized.compareAndSet(false, true)) {
             instance.register(LoginProtos.class);
         }

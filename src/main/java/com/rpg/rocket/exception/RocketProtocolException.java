@@ -11,11 +11,6 @@ public class RocketProtocolException extends RocketException {
     public RocketProtocol.Status status;
     public RocketProtocol protocol;
 
-
-    public RocketProtocolException() {
-        super();
-    }
-
     public RocketProtocolException(String message) {
         super(message);
     }

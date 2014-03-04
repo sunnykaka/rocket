@@ -13,8 +13,8 @@ message ResponseMsg {
 }
 
 enum ResponseStatus {
-    SUCCESS = 0;
-    UNKNOWN_ERROR = 1;
+    SUCCESS = 1;
+    UNKNOWN_ERROR = 2;
 
     USERNAME_NOT_EXIST = 100;
     PASSWORD_INCORRECT = 101;
