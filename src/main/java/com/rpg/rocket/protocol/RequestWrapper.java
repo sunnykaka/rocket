@@ -38,16 +38,7 @@ public class RequestWrapper {
             throw new RocketProtocolException(RocketProtocol.Status.DATA_CORRUPT, protocol);
         }
 
-        Method messageParseMethod = descriptorRegistry.getMessageParseMethod(requestMsg.getMessageType());
-        if(messageParseMethod == null) {
-            throw new RocketProtocolException(RocketProtocol.Status.UNKNOWN_MESSAGE_TYPE, protocol);
-        }
-        try {
-            Message message = (Message)messageParseMethod.invoke(null, protocol.getData());
-            this.message = message;
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RocketProtocolException(RocketProtocol.Status.DATA_CORRUPT, protocol);
-        }
+        this.message = ProtocolUtil.parseMessageFromDataAndType(requestMsg.getMessageType(), requestMsg.getMessage().toByteArray());
 
         this.requestInfo = new RequestInfo(requestMsg.getUserId());
     }

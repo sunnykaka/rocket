@@ -3,6 +3,8 @@ package com.rpg.rocket.protocol;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import com.rpg.rocket.blaster.RequestInfo;
+import com.rpg.rocket.blaster.ResponseInfo;
 import com.rpg.rocket.exception.RocketProtocolException;
 import com.rpg.rocket.message.BaseMsgProtos;
 
@@ -16,6 +18,10 @@ public class ResponseWrapper {
 
     private BaseMsgProtos.ResponseMsg responseMsg;
 
+    private Message message;
+
+    private ResponseInfo responseInfo;
+
     public ResponseWrapper(RocketProtocol protocol) {
         this.protocol = protocol;
         Preconditions.checkArgument(RocketProtocol.Type.RESPONSE.equals(protocol.getType()));
@@ -26,6 +32,12 @@ public class ResponseWrapper {
         } catch (InvalidProtocolBufferException e) {
             throw new RocketProtocolException(RocketProtocol.Status.DATA_CORRUPT, protocol);
         }
+        if(responseMsg.getMessageType() != null && responseMsg.getMessage() != null) {
+            this.message = ProtocolUtil.parseMessageFromDataAndType(responseMsg.getMessageType(), responseMsg.getMessage().toByteArray());
+        }
+
+        this.responseInfo = new ResponseInfo(responseMsg.getStatus(), responseMsg.getMsg());
+
     }
 
     public ResponseWrapper(int version, RocketProtocol.Phase phase, int id, RocketProtocol.Status status, BaseMsgProtos.ResponseStatus responseStatus,
@@ -65,5 +77,13 @@ public class ResponseWrapper {
 
     public RocketProtocol getProtocol() {
         return protocol;
+    }
+
+    public Message getMessage() {
+        return message;
+    }
+
+    public ResponseInfo getResponseInfo() {
+        return responseInfo;
     }
 }
