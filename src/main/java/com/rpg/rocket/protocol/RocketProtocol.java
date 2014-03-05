@@ -178,6 +178,8 @@ public class RocketProtocol {
         /** 未知的消息类型 **/
         UNKNOWN_MESSAGE_TYPE(6),
 
+        /** 超时 **/
+        TIMEOUT(7),
 
         /** 其他错误 **/
         OTHER(999);
@@ -274,15 +276,17 @@ public class RocketProtocol {
             return this;
         }
 
-        public Builder setType(Type type) {
-            protocol.type = type;
-            return this;
-        }
 
         public Builder setTimeout(Integer millisecond) {
             if(millisecond != null && millisecond > 0) {
                 protocol.timeout = Clock.nowInMillisecond() + millisecond;
             }
+            return this;
+        }
+
+        public Builder setResponseId(int id) {
+            protocol.type = Type.RESPONSE;
+            protocol.id = id;
             return this;
         }
 
@@ -315,6 +319,10 @@ public class RocketProtocol {
         public RocketProtocol build() {
             if(Type.REQUEST.equals(protocol.type)) {
                 protocol.id = IdGenerator.getRequestId();
+            } else {
+                if(protocol.id < 1) {
+                    throw new RocketProtocolException("创建RocketProtocol失败,返回消息的id属性不能为空");
+                }
             }
             return protocol;
         }

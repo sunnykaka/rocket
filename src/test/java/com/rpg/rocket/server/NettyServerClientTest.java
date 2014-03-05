@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.hamcrest.MatcherAssert.*;
@@ -30,9 +31,9 @@ public class NettyServerClientTest extends BaseTest {
         final List<RocketProtocol> serverProtocolList = new CopyOnWriteArrayList<>();
 
         RequestWrapper request1 = new RequestWrapper(1, RocketProtocol.Phase.PLAINTEXT, 10000, 123L, buildUser());
-        ResponseWrapper response2 = new ResponseWrapper(1, RocketProtocol.Phase.CIPHERTEXT, RocketProtocol.Status.DATA_CORRUPT, null, null, null);
-        ResponseWrapper response3 = new ResponseWrapper(1, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.USERNAME_NOT_EXIST, "haha", null);
-        ResponseWrapper response4 = new ResponseWrapper(1, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.SUCCESS, null, buildUser());
+        ResponseWrapper response2 = new ResponseWrapper(1, RocketProtocol.Phase.CIPHERTEXT, 10, RocketProtocol.Status.DATA_CORRUPT, null, null, null);
+        ResponseWrapper response3 = new ResponseWrapper(1, RocketProtocol.Phase.PLAINTEXT, 10, RocketProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.USERNAME_NOT_EXIST, "haha", null);
+        ResponseWrapper response4 = new ResponseWrapper(1, RocketProtocol.Phase.PLAINTEXT, 10, RocketProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.SUCCESS, null, buildUser());
 
         clientProtocolList.add(request1.getProtocol());
         clientProtocolList.add(response2.getProtocol());

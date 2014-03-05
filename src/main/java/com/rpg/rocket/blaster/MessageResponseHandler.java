@@ -9,8 +9,8 @@ import com.rpg.rocket.protocol.RocketProtocol;
  */
 public interface MessageResponseHandler {
 
-    Message handleResponse(Message originMessage, Message message);
+    Message handleResponse(RequestInfo originRequestInfo, Message originMessage, ResponseInfo responseInfo, Message result);
 
-    void handleFailureOrTimeout(Message originMessage, RocketProtocol.Status status);
+    void handleFailureOrTimeout(RequestInfo originRequestInfo, Message originMessage, RocketProtocol.Status status);
 
 }

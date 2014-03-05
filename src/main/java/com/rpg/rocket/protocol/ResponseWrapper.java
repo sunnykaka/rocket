@@ -28,7 +28,7 @@ public class ResponseWrapper {
         }
     }
 
-    public ResponseWrapper(int version, RocketProtocol.Phase phase, RocketProtocol.Status status, BaseMsgProtos.ResponseStatus responseStatus,
+    public ResponseWrapper(int version, RocketProtocol.Phase phase, int id, RocketProtocol.Status status, BaseMsgProtos.ResponseStatus responseStatus,
                            String msg, Message message) {
         Preconditions.checkNotNull(phase);
         Preconditions.checkNotNull(status);
@@ -37,7 +37,7 @@ public class ResponseWrapper {
         protocol.setPhase(phase);
         protocol.setVersion(version);
         protocol.setStatus(status);
-        protocol.setType(RocketProtocol.Type.RESPONSE);
+        protocol.setResponseId(id);
 
         if(RocketProtocol.Status.SUCCESS.equals(status)) {
             //只有正常解析协议了才设置业务对象

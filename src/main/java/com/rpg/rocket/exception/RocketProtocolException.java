@@ -27,4 +27,12 @@ public class RocketProtocolException extends RocketException {
         this.status = status;
         this.protocol = protocol;
     }
+
+    public RocketProtocol.Status getStatus() {
+        return status;
+    }
+
+    public RocketProtocol getProtocol() {
+        return protocol;
+    }
 }

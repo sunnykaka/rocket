@@ -10,6 +10,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -27,6 +28,8 @@ public class RocketProtocolTest extends BaseTest{
         UserProtos.User user = buildUser();
 
         checkEncodeAndDecodeRequest(1, RocketProtocol.Phase.PLAINTEXT, 60, null, user);
+        checkEncodeAndDecodeRequest(1, RocketProtocol.Phase.CIPHERTEXT, 0, 123L, user);
+
     }
 
     @Test
@@ -34,6 +37,8 @@ public class RocketProtocolTest extends BaseTest{
         UserProtos.User user = buildUser();
 
         checkEncodeAndDecodeResponse(1, RocketProtocol.Phase.CIPHERTEXT, RocketProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.SUCCESS, "haha", user);
+        checkEncodeAndDecodeResponse(1, RocketProtocol.Phase.CIPHERTEXT, RocketProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.UNKNOWN_ERROR, "haha", user);
+        checkEncodeAndDecodeResponse(1, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Status.DATA_CORRUPT, BaseMsgProtos.ResponseStatus.SUCCESS, "haha", user);
 
     }
 
@@ -56,9 +61,9 @@ public class RocketProtocolTest extends BaseTest{
 
 
         RequestWrapper request1 = new RequestWrapper(1, RocketProtocol.Phase.PLAINTEXT, 10000, 123L, buildUser());
-        ResponseWrapper response2 = new ResponseWrapper(1, RocketProtocol.Phase.CIPHERTEXT, RocketProtocol.Status.DATA_CORRUPT, null, null, null);
-        ResponseWrapper response3 = new ResponseWrapper(1, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.USERNAME_NOT_EXIST, "haha", null);
-        ResponseWrapper response4 = new ResponseWrapper(1, RocketProtocol.Phase.PLAINTEXT, RocketProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.SUCCESS, null, buildUser());
+        ResponseWrapper response2 = new ResponseWrapper(1, RocketProtocol.Phase.CIPHERTEXT, 10, RocketProtocol.Status.DATA_CORRUPT, null, null, null);
+        ResponseWrapper response3 = new ResponseWrapper(1, RocketProtocol.Phase.PLAINTEXT, 10, RocketProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.USERNAME_NOT_EXIST, "haha", null);
+        ResponseWrapper response4 = new ResponseWrapper(1, RocketProtocol.Phase.PLAINTEXT, 10, RocketProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.SUCCESS, null, buildUser());
 
         RocketProtocol protocol1 = request1.getProtocol();
         RocketProtocol protocol2 = response2.getProtocol();

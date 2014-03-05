@@ -3,8 +3,13 @@ package com.rpg.rocket.protocol;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import com.rpg.rocket.blaster.RequestInfo;
 import com.rpg.rocket.exception.RocketProtocolException;
 import com.rpg.rocket.message.BaseMsgProtos;
+import com.rpg.rocket.pb.DescriptorRegistry;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * User: liubin
@@ -12,9 +17,15 @@ import com.rpg.rocket.message.BaseMsgProtos;
  */
 public class RequestWrapper {
 
+    private DescriptorRegistry descriptorRegistry = DescriptorRegistry.getInstance();
+
     private RocketProtocol protocol;
 
     private BaseMsgProtos.RequestMsg requestMsg;
+
+    private Message message;
+
+    private RequestInfo requestInfo;
 
     public RequestWrapper(RocketProtocol protocol) {
         this.protocol = protocol;
@@ -26,6 +37,19 @@ public class RequestWrapper {
         } catch (InvalidProtocolBufferException e) {
             throw new RocketProtocolException(RocketProtocol.Status.DATA_CORRUPT, protocol);
         }
+
+        Method messageParseMethod = descriptorRegistry.getMessageParseMethod(requestMsg.getMessageType());
+        if(messageParseMethod == null) {
+            throw new RocketProtocolException(RocketProtocol.Status.UNKNOWN_MESSAGE_TYPE, protocol);
+        }
+        try {
+            Message message = (Message)messageParseMethod.invoke(null, protocol.getData());
+            this.message = message;
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new RocketProtocolException(RocketProtocol.Status.DATA_CORRUPT, protocol);
+        }
+
+        this.requestInfo = new RequestInfo(requestMsg.getUserId());
     }
 
     public RequestWrapper(int version, RocketProtocol.Phase phase, int timeout, Long userId, Message message) {
@@ -36,7 +60,6 @@ public class RequestWrapper {
         protocol.setPhase(phase);
         protocol.setVersion(version);
         protocol.setTimeout(timeout);
-        protocol.setType(RocketProtocol.Type.REQUEST);
 
         BaseMsgProtos.RequestMsg.Builder requestMsg = BaseMsgProtos.RequestMsg.newBuilder();
 
@@ -48,6 +71,8 @@ public class RequestWrapper {
         this.requestMsg = requestMsg.build();
         protocol.setMessage(this.requestMsg);
         this.protocol = protocol.build();
+        this.message = message;
+        requestInfo = new RequestInfo(requestMsg.getUserId());
 
     }
 
@@ -57,5 +82,13 @@ public class RequestWrapper {
 
     public RocketProtocol getProtocol() {
         return protocol;
+    }
+
+    public Message getMessage() {
+        return message;
+    }
+
+    public RequestInfo getRequestInfo() {
+        return requestInfo;
     }
 }

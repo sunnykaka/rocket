@@ -1,6 +1,7 @@
 package com.rpg.rocket.blaster;
 
 import com.google.protobuf.Message;
+import com.rpg.rocket.protocol.RocketProtocol;
 
 /**
  * User: liubin
@@ -8,6 +9,8 @@ import com.google.protobuf.Message;
  */
 public interface MessageRequestHandler {
 
-    Message handleRequest(Message message);
+    Message handleRequest(RequestInfo requestInfo, Message message);
+
+    RocketProtocol.Phase getPhase();
 
 }

@@ -17,6 +17,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -72,7 +73,7 @@ public class BaseTest {
     protected void checkEncodeAndDecodeResponse(int version, RocketProtocol.Phase phase, RocketProtocol.Status status, BaseMsgProtos.ResponseStatus responseStatus,
                                             String msg, Message message) {
 
-        ResponseWrapper response = new ResponseWrapper(version, phase, status, responseStatus, msg, message);
+        ResponseWrapper response = new ResponseWrapper(version, phase, 10, status, responseStatus, msg, message);
 
         ByteBuf buffer = Unpooled.buffer();
         response.getProtocol().encode(buffer);
