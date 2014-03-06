@@ -2,6 +2,7 @@ package com.rpg.rocket.blaster;
 
 import com.google.protobuf.Message;
 import com.rpg.rocket.blaster.registry.MessageHandlerRegistry;
+import com.rpg.rocket.common.SysConstant;
 import com.rpg.rocket.exception.RocketProtocolException;
 import com.rpg.rocket.message.BaseMsgProtos;
 import com.rpg.rocket.pb.DescriptorRegistry;
@@ -57,6 +58,8 @@ public class BlasterSender {
 
     public void sendRequest(Channel channel, RequestWrapper request, final boolean async, MessageResponseHandler messageResponseHandler) {
 
+        final int id = request.getProtocol().getId();
+
         channel.write(request.getRequestMsg()).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
@@ -65,10 +68,31 @@ public class BlasterSender {
                 }
                 if(!async) {
                     //同步调用的写消息不成功,就往队列里放错误消息
-//                    queueMap.get(protocol.getId).put(...);
+                    TransferQueue<ResponseWrapper> requestWaiterQueue = requestWaiterQueueMap.get(id);
+                    if(requestWaiterQueue != null) {
+                        ResponseWrapper response = createSendRequestFailedResponse(id);
+                        try {
+                            requestWaiterQueue.tryTransfer(response, 1000, TimeUnit.MILLISECONDS);
+                        } catch (InterruptedException ignore) {}
+                    }
                 } else {
                     //异步调用的写消息不成功,就执行错误处理方法
                     //executor.execute(responseHandlerMap.get(protocol.getId));
+                    RequestWrapper originRequest = originRequestMap.get(id);
+                    MessageResponseHandler messageResponseHandler = responseHandlerMap.get(id);
+                    if(originRequest == null || messageResponseHandler == null) return;
+
+                    try {
+                        ResponseWrapper response = createSendRequestFailedResponse(id);
+                        handleResponse(originRequest, response, messageResponseHandler);
+                    } catch (Exception e) {
+                        log.error("写消息失败后进行异步结果处理的时候发生错误", e);
+                    } finally {
+                        //clean
+                        originRequestMap.remove(id);
+                        responseHandlerMap.remove(id);
+                    }
+
                 }
             }
         });
@@ -78,43 +102,53 @@ public class BlasterSender {
         if(!async) {
 
             TransferQueue<ResponseWrapper> requestWaiterQueue = new LinkedTransferQueue<>();
-            requestWaiterQueueMap.put(request.getProtocol().getId(), requestWaiterQueue);
+            requestWaiterQueueMap.put(id, requestWaiterQueue);
 
-            long timeoutInMillseconds = request.getProtocol().getTimeout() - Clock.nowInMillisecond();
-            ResponseWrapper response = null;
-            if(timeoutInMillseconds > 0) {
-                try {
-                    response = requestWaiterQueue.poll(timeoutInMillseconds, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException e) {
-                    log.error("", e);
+            try {
+                long timeoutInMillseconds = request.getProtocol().getTimeout() - Clock.nowInMillisecond();
+                ResponseWrapper response = null;
+                if(timeoutInMillseconds > 0) {
+                    try {
+                        response = requestWaiterQueue.poll(timeoutInMillseconds, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        log.error("", e);
+                    }
+                } else {
+                    response = requestWaiterQueue.poll();
                 }
-            } else {
-                response = requestWaiterQueue.poll();
-            }
-            RocketProtocol.Status status = RocketProtocol.Status.TIMEOUT;
-            if(response != null) {
-                status = response.getProtocol().getStatus();
-            }
-
-            if(RocketProtocol.Status.SUCCESS.equals(status)) {
-                messageResponseHandler.handleResponse(request.getRequestInfo(), request.getMessage(), response.getResponseInfo(), response.getMessage());
-            } else {
-                messageResponseHandler.handleFailure(request.getRequestInfo(), request.getMessage(), status);
+                handleResponse(request, response, messageResponseHandler);
+            } catch (Exception e) {
+                log.error("同步发送消息并且进行结果处理的时候发生错误", e);
+            } finally {
+                //clean
+                requestWaiterQueueMap.remove(id);
             }
 
-
-
-//            requestWaiterQueue.take()
-//            queueMap.put(protocol.getId, queue);
-//            RocketProtocol response = queue.take(timeout);
-            //判断response成功与否,如果不成功,调用错误处理方法,否则调用处理方法
-            //最后将返回值返回
-            //return handler.handleReponse(message);
         } else {
-            responseHandlerMap.put(protocol.getId, handler);
-            return null;
+
+            originRequestMap.put(id, request);
+            responseHandlerMap.put(id, messageResponseHandler);
+
         }
 
+    }
+
+    private ResponseWrapper createSendRequestFailedResponse(int id) {
+        return new ResponseWrapper(SysConstant.PROTOCOL_VERSION, RocketProtocol.Phase.PLAINTEXT, id,
+                RocketProtocol.Status.REQUEST_FAILED, null, null, null);
+    }
+
+    private void handleResponse(RequestWrapper originRequest, ResponseWrapper response, MessageResponseHandler messageResponseHandler) {
+        RocketProtocol.Status status = RocketProtocol.Status.TIMEOUT;
+        if(response != null) {
+            status = response.getProtocol().getStatus();
+        }
+
+        if(RocketProtocol.Status.SUCCESS.equals(status)) {
+            messageResponseHandler.handleResponse(originRequest.getRequestInfo(), originRequest.getMessage(), response.getResponseInfo(), response.getMessage());
+        } else {
+            messageResponseHandler.handleFailure(originRequest.getRequestInfo(), originRequest.getMessage(), status);
+        }
     }
 
 

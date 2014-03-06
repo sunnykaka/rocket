@@ -181,6 +181,9 @@ public class RocketProtocol {
         /** 超时 **/
         TIMEOUT(7),
 
+        /** 请求发送失败 **/
+        REQUEST_FAILED(8),
+
         /** 其他错误 **/
         OTHER(999);
 
