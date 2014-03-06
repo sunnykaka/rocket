@@ -91,10 +91,12 @@ public class BlasterReceiver {
             return new ResponseWrapper(1, messageRequestHandler.getPhase(), id, RocketProtocol.Status.SUCCESS, responseStatus, responseMsg, result);
 
         } else {
-
-
             ResponseWrapper response = new ResponseWrapper(protocol);
             RocketProtocol.Status status = protocol.getStatus();
+
+
+
+
 
             return null;
         }

@@ -32,6 +32,7 @@ public class RequestWrapper {
         Preconditions.checkArgument(RocketProtocol.Type.REQUEST.equals(protocol.getType()));
         byte[] data = protocol.getData();
         if(data == null) return;
+        //TODO 不允许data为空
         try {
             this.requestMsg = BaseMsgProtos.RequestMsg.parseFrom(data);
         } catch (InvalidProtocolBufferException e) {
