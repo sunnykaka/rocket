@@ -67,7 +67,7 @@ public class RocketServer {
     }
 
     public Channel accept() throws InterruptedException {
-        return accept(new RocketServerProtocolHandler());
+        return accept(new NettyRocketProtocolReceiver());
     }
 
     public static void main(String[] args) throws Exception {

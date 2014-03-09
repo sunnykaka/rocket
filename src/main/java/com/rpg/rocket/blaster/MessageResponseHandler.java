@@ -19,6 +19,12 @@ public interface MessageResponseHandler {
      */
     void handleResponse(RequestInfo originRequestInfo, Message originMessage, ResponseInfo responseInfo, Message result);
 
+    /**
+     * 请求失败的时候会执行该方法
+     * @param originRequestInfo 不会为null
+     * @param originMessage 不会为null
+     * @param status 不会为null
+     */
     void handleFailure(RequestInfo originRequestInfo, Message originMessage, RocketProtocol.Status status);
 
 }

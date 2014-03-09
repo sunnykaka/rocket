@@ -39,18 +39,16 @@ public class MessageHandlerRegistry {
         }
     }
 
-    public void registerMessageRequestHandler(Message message, MessageRequestHandler requestHandler) {
-        Preconditions.checkNotNull(requestHandler);
-        String messageType = message.getDescriptorForType().getFullName();
+    public void registerMessageRequestHandler(Descriptors.Descriptor descriptor, MessageRequestHandler requestHandler) {
+        String messageType = descriptor.getFullName();
         if(requestHandlerMap.containsKey(messageType)) {
             throw new BlasterException(String.format("注册messageRequestHandler的时候发生错误,messageType[%s]对应的handler已经存在", messageType));
         }
         requestHandlerMap.put(messageType, requestHandler);
     }
 
-    public void registerMessageResponseHandler(Message message, MessageResponseHandler responseHandler) {
-        Preconditions.checkNotNull(responseHandler);
-        String messageType = message.getDescriptorForType().getFullName();
+    public void registerMessageResponseHandler(Descriptors.Descriptor descriptor, MessageResponseHandler responseHandler) {
+        String messageType = descriptor.getFullName();
         if(responseHandlerMap.containsKey(messageType)) {
             throw new BlasterException(String.format("注册messageResponseHandler的时候发生错误,messageType[%s]对应的handler已经存在", messageType));
         }

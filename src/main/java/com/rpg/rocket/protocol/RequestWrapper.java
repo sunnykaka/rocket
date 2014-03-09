@@ -17,8 +17,6 @@ import java.lang.reflect.Method;
  */
 public class RequestWrapper {
 
-    private DescriptorRegistry descriptorRegistry = DescriptorRegistry.getInstance();
-
     private RocketProtocol protocol;
 
     private BaseMsgProtos.RequestMsg requestMsg;
@@ -82,5 +80,15 @@ public class RequestWrapper {
 
     public RequestInfo getRequestInfo() {
         return requestInfo;
+    }
+
+    @Override
+    public String toString() {
+        return "RequestWrapper{" +
+                "protocol=" + protocol +
+                ", requestMsg=" + requestMsg +
+                ", message=" + message +
+                ", requestInfo=" + requestInfo +
+                '}';
     }
 }

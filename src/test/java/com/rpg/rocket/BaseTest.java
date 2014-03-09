@@ -2,6 +2,7 @@ package com.rpg.rocket;
 
 
 import com.google.protobuf.Message;
+import com.rpg.rocket.blaster.registry.MessageHandlerRegistry;
 import com.rpg.rocket.client.RocketClient;
 import com.rpg.rocket.domain.UserProtos;
 import com.rpg.rocket.message.BaseMsgProtos;
@@ -13,6 +14,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -26,8 +29,12 @@ import static org.hamcrest.Matchers.notNullValue;
 @Test
 public class BaseTest {
 
+    protected final Logger log = LoggerFactory.getLogger(this.getClass());
+
     protected String host = "localhost";
     protected int port = 8080;
+
+    protected MessageHandlerRegistry messageHandlerRegistry = MessageHandlerRegistry.getInstance();
 
     @BeforeTest
     public void init() {

@@ -16,7 +16,6 @@ message LoginRequest {
 
 message LoginResponse {
 
-    optional ResponseMsg response = 1;
-    optional rocket.domain.pb.User user = 2;
+    optional rocket.domain.pb.User user = 1;
 
 }

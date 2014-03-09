@@ -1,10 +1,7 @@
 package com.rpg.rocket.blaster;
 
-import com.google.protobuf.Message;
 import com.rpg.rocket.blaster.registry.MessageHandlerRegistry;
-import com.rpg.rocket.common.SysConstant;
-import com.rpg.rocket.exception.RocketProtocolException;
-import com.rpg.rocket.message.BaseMsgProtos;
+import com.rpg.rocket.common.SysConstants;
 import com.rpg.rocket.pb.DescriptorRegistry;
 import com.rpg.rocket.protocol.RequestWrapper;
 import com.rpg.rocket.protocol.ResponseWrapper;
@@ -16,9 +13,6 @@ import io.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedTransferQueue;
@@ -33,20 +27,17 @@ public class BlasterSender {
 
     private static final Logger log = LoggerFactory.getLogger(BlasterSender.class);
 
-    private DescriptorRegistry descriptorRegistry = DescriptorRegistry.getInstance();
-    private MessageHandlerRegistry messageHandlerRegistry = MessageHandlerRegistry.getInstance();
+    public static Map<Integer, TransferQueue<ResponseWrapper>> requestWaiterQueueMap = new ConcurrentHashMap<>();
 
-    private static Map<Integer, TransferQueue<ResponseWrapper>> requestWaiterQueueMap = new ConcurrentHashMap<>();
+    public static Map<Integer, MessageResponseHandler> responseHandlerMap = new ConcurrentHashMap<>();
 
-    private static Map<Integer, MessageResponseHandler> responseHandlerMap = new ConcurrentHashMap<>();
-
-    private static Map<Integer, RequestWrapper> originRequestMap = new ConcurrentHashMap<>();
+    public static Map<Integer, RequestWrapper> originRequestMap = new ConcurrentHashMap<>();
 
     public void sendResponse(Channel channel, ResponseWrapper response) {
         RocketProtocol protocol = response.getProtocol();
         if(protocol.getId() <= 0) {
             //id无效,无需返回结果
-            log.warn("接收到id小于1的消息,id[{}],无法返回消息,消息内容:{}", protocol.getId(), protocol.toString());
+            log.warn("接收到id小于1的消息,id[{}],无法返回消息,消息内容:{}", protocol.getId(), response.toString());
             return;
         }
         if(Clock.isTimeout(protocol.getTimeout())) {
@@ -84,9 +75,9 @@ public class BlasterSender {
 
                     try {
                         ResponseWrapper response = createSendRequestFailedResponse(id);
-                        handleResponse(originRequest, response, messageResponseHandler);
+                        MessageResponseDispatcher.handleResponse(originRequest, response, messageResponseHandler);
                     } catch (Exception e) {
-                        log.error("写消息失败后进行异步结果处理的时候发生错误", e);
+                        log.error("进行异步结果处理的时候发生错误", e);
                     } finally {
                         //clean
                         originRequestMap.remove(id);
@@ -116,7 +107,7 @@ public class BlasterSender {
                 } else {
                     response = requestWaiterQueue.poll();
                 }
-                handleResponse(request, response, messageResponseHandler);
+                MessageResponseDispatcher.handleResponse(request, response, messageResponseHandler);
             } catch (Exception e) {
                 log.error("同步发送消息并且进行结果处理的时候发生错误", e);
             } finally {
@@ -129,27 +120,17 @@ public class BlasterSender {
             originRequestMap.put(id, request);
             responseHandlerMap.put(id, messageResponseHandler);
 
+            //TODO 需要对异步请求的超时情况处理,将超时的回调函数从map中取出,并执行超时的回调方法
+
         }
 
     }
 
     private ResponseWrapper createSendRequestFailedResponse(int id) {
-        return new ResponseWrapper(SysConstant.PROTOCOL_VERSION, RocketProtocol.Phase.PLAINTEXT, id,
+        return new ResponseWrapper(SysConstants.PROTOCOL_VERSION, RocketProtocol.Phase.PLAINTEXT, id,
                 RocketProtocol.Status.REQUEST_FAILED, null, null, null);
     }
 
-    private void handleResponse(RequestWrapper originRequest, ResponseWrapper response, MessageResponseHandler messageResponseHandler) {
-        RocketProtocol.Status status = RocketProtocol.Status.TIMEOUT;
-        if(response != null) {
-            status = response.getProtocol().getStatus();
-        }
-
-        if(RocketProtocol.Status.SUCCESS.equals(status)) {
-            messageResponseHandler.handleResponse(originRequest.getRequestInfo(), originRequest.getMessage(), response.getResponseInfo(), response.getMessage());
-        } else {
-            messageResponseHandler.handleFailure(originRequest.getRequestInfo(), originRequest.getMessage(), status);
-        }
-    }
 
 
 }

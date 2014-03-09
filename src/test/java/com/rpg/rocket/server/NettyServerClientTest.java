@@ -59,11 +59,11 @@ public class NettyServerClientTest extends BaseTest {
         StopWatch sw = new StopWatch();
         sw.start();
         while(serverProtocolList.size() != clientProtocolList.size()) {
-            System.out.println("服务器还没接收完所有数据,等待");
+            log.info("服务器还没接收完所有数据,等待");
             Thread.sleep(1000);
         }
         sw.stop();
-        System.out.println("等待服务器数据完成共耗时:" + sw.toString());
+        log.info("等待服务器数据完成共耗时:" + sw.toString());
 
         //到这里写入和读取应该完成
         //判断结果

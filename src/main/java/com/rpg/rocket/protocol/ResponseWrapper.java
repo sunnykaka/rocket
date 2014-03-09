@@ -86,4 +86,14 @@ public class ResponseWrapper {
     public ResponseInfo getResponseInfo() {
         return responseInfo;
     }
+
+    @Override
+    public String toString() {
+        return "ResponseWrapper{" +
+                "protocol=" + protocol +
+                ", responseMsg=" + responseMsg +
+                ", message=" + message +
+                ", responseInfo=" + responseInfo +
+                '}';
+    }
 }
