@@ -34,6 +34,8 @@ public class BaseTest {
     protected String host = "localhost";
     protected int port = 8080;
 
+    private static int idNumber = 0;
+
     protected MessageHandlerRegistry messageHandlerRegistry = MessageHandlerRegistry.getInstance();
 
     @BeforeTest
@@ -104,6 +106,10 @@ public class BaseTest {
         } else {
             assertThat(new ResponseWrapper(protocol).getResponseMsg(), is(new ResponseWrapper(decodeProtocol).getResponseMsg()));
         }
+    }
+
+    protected static synchronized int generateId() {
+        return ++idNumber;
     }
 
 }

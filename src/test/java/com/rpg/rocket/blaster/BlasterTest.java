@@ -60,8 +60,9 @@ public class BlasterTest extends BaseTest {
                     false, new LoginResponseHandler(blasterTestTool));
         }
 
-        //现在请求应该已经被全部接收,验证结果
+        Thread.sleep(10000);
 
+        //现在请求应该已经被全部接收,验证结果
         blasterTestTool.validate();
 
     }
@@ -128,6 +129,7 @@ public class BlasterTest extends BaseTest {
                 String username = RandomStringUtils.randomAlphabetic(8);
                 String password = RandomStringUtils.randomAlphabetic(16);
                 UserProtos.User.Builder user = UserProtos.User.newBuilder();
+                user.setId(generateId());
                 user.setUsername(username);
                 user.setPassword(password);
                 UserProtos.User.Coordinate.Builder coordinate = UserProtos.User.Coordinate.newBuilder();
@@ -192,6 +194,10 @@ public class BlasterTest extends BaseTest {
                 assertThat(responseInfo, notNullValue());
                 assertThat(responseInfo.getResponseStatus(), notNullValue());
                 assertThat(responseInfo.getResponseStatus(), is(BaseMsgProtos.ResponseStatus.SUCCESS));
+
+                assertThat(loginResponse, notNullValue());
+                assertThat(loginResponse.getUser(), notNullValue());
+                assertThat(loginResponse.getUser(), is(user));
 
 
             }

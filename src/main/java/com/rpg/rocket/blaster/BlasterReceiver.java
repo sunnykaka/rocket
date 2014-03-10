@@ -27,6 +27,10 @@ public class BlasterReceiver {
 
     public ResponseWrapper receive(RocketProtocol protocol) throws RocketProtocolException {
 
+        if(log.isDebugEnabled()) {
+            log.debug("接收到请求或响应, protocol[{}]", protocol);
+        }
+
         boolean decipher = false;
 
         if(protocol.getVersion() != 1) {
@@ -71,6 +75,9 @@ public class BlasterReceiver {
             String responseMsg = null;
 
             try {
+                if(log.isDebugEnabled()) {
+                    log.debug("执行请求,requestId[{}], request[{}]", protocol.getId(), request);
+                }
                 result = messageRequestHandler.handleRequest(request.getRequestInfo(), message);
                 responseStatus = BaseMsgProtos.ResponseStatus.SUCCESS;
             } catch (AppException e) {
@@ -99,6 +106,9 @@ public class BlasterReceiver {
             RequestWrapper originRequest = BlasterSender.originRequestMap.get(id);
             if(messageResponseHandler != null && originRequest != null) {
                 try {
+                    if(log.isDebugEnabled()) {
+                        log.debug("接收到同步响应消息,运行回调函数,requestId[{}], response[{}]", protocol.getId(), response);
+                    }
                     MessageResponseDispatcher.handleResponse(originRequest, response, messageResponseHandler);
                 } catch (Exception e) {
                     log.error("进行异步结果处理的时候发生错误", e);
@@ -111,14 +121,16 @@ public class BlasterReceiver {
 
             //尝试是不是同步请求的
             TransferQueue<ResponseWrapper> requestWaiterQueue = BlasterSender.requestWaiterQueueMap.get(id);
-            boolean transferResponseToWaitingThread = false;
             if(requestWaiterQueue != null && requestWaiterQueue.hasWaitingConsumer()) {
                 //如果队列不为null并且有消费者在等待,尝试将响应结果传给等待线程
-                transferResponseToWaitingThread = requestWaiterQueue.tryTransfer(response);
-            }
-            if(transferResponseToWaitingThread)  {
-                //成功将响应结果传给等待线程
-                return null;
+                boolean transferResponseToWaitingThreadSuccess = requestWaiterQueue.tryTransfer(response);
+                if(log.isDebugEnabled()) {
+                    log.debug("接收到异步响应消息,尝试将消息放入队列,requestId[{}], success[{}]", protocol.getId(), transferResponseToWaitingThreadSuccess);
+                }
+                if(transferResponseToWaitingThreadSuccess)  {
+                    //成功将响应结果传给等待线程
+                    return null;
+                }
             }
 
             //此时该响应结果不知道如何处理,记录警告信息

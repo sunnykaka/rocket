@@ -40,6 +40,9 @@ public class BlasterSender {
             log.warn("接收到id小于1的消息,id[{}],无法返回消息,消息内容:{}", protocol.getId(), response.toString());
             return;
         }
+        if(log.isDebugEnabled()) {
+            log.debug("准备发送响应, id[{}], response[{}]", new Object[]{protocol.getId(), response});
+        }
         if(Clock.isTimeout(protocol.getTimeout())) {
             //已超时,无需返回结果
             return;
@@ -51,9 +54,16 @@ public class BlasterSender {
 
         final int id = request.getProtocol().getId();
 
+        if(log.isDebugEnabled()) {
+            log.debug("准备发送请求, id[{}], request[{}], async[{}], messageResponseHandler[{}]", new Object[]{id, request, async, messageResponseHandler});
+        }
+
         channel.write(request.getRequestMsg()).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
+                if(log.isDebugEnabled()) {
+                    log.debug("发送请求结束, id[{}], async[{}], success[{}]", new Object[]{id, async, future.isSuccess()});
+                }
                 if(future.isSuccess()) {
                     return;
                 }
@@ -100,6 +110,7 @@ public class BlasterSender {
                 ResponseWrapper response = null;
                 if(timeoutInMillseconds > 0) {
                     try {
+                        log.debug("同步请求开始等待返回结果,id[{}],等待时间[{}ms]", id, timeoutInMillseconds);
                         response = requestWaiterQueue.poll(timeoutInMillseconds, TimeUnit.MILLISECONDS);
                     } catch (InterruptedException e) {
                         log.error("", e);
