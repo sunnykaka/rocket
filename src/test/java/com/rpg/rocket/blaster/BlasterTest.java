@@ -14,6 +14,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import java.util.*;
@@ -32,7 +34,7 @@ public class BlasterTest extends BaseTest {
 
     public void test() throws InterruptedException {
 
-        int requestCount = 1;
+        int requestCount = 10;
 
         BlasterTestTool blasterTestTool = new BlasterTestTool(requestCount);
 
@@ -60,7 +62,7 @@ public class BlasterTest extends BaseTest {
                     false, new LoginResponseHandler(blasterTestTool));
         }
 
-        Thread.sleep(10000);
+        Thread.sleep(5000);
 
         //现在请求应该已经被全部接收,验证结果
         blasterTestTool.validate();
@@ -118,13 +120,18 @@ public class BlasterTest extends BaseTest {
     }
 
     static class BlasterTestTool {
+        private static Logger log = LoggerFactory.getLogger(BlasterTestTool.class);
+
         private Map<String, UserProtos.User> userMap = new LinkedHashMap<>();
         private List<UserProtos.User> users = new ArrayList<>();
+
+        private int count = 0;
 
         public List<Object[]> serverReceiverParamsList = new ArrayList<>();
         public List<Object[]> clientMessageResponseParamsList = new ArrayList<>();
 
         public BlasterTestTool(int count) {
+            this.count = count;
             for (int i = 1; i <= count; i++) {
                 String username = RandomStringUtils.randomAlphabetic(8);
                 String password = RandomStringUtils.randomAlphabetic(16);
@@ -161,8 +168,10 @@ public class BlasterTest extends BaseTest {
         }
 
         public void validate() {
+            log.info("serverReceiverParamsList size:" + serverReceiverParamsList.size());
             assertThat(serverReceiverParamsList.size(), is(users.size()));
             assertThat(clientMessageResponseParamsList.size(), is(users.size()));
+            assertThat(clientMessageResponseParamsList.size(), is(count));
 
             for (int i = 0; i < users.size(); i++) {
                 UserProtos.User user = users.get(i);
@@ -175,7 +184,7 @@ public class BlasterTest extends BaseTest {
                 RequestInfo originRequestInfo = (RequestInfo) clientMessageResponseParams[0];
                 LoginProtos.LoginRequest originLoginRequest = (LoginProtos.LoginRequest) clientMessageResponseParams[1];
                 ResponseInfo responseInfo = (ResponseInfo)clientMessageResponseParams[2];
-                LoginProtos.LoginResponse loginResponse = (LoginProtos.LoginResponse) clientMessageResponseParams[3];
+                UserProtos.User responseUser = (UserProtos.User) clientMessageResponseParams[3];
 
                 //assert request in server
                 assertThat(requestInfo, notNullValue());
@@ -186,7 +195,7 @@ public class BlasterTest extends BaseTest {
 
                 //assert message response in client
                 assertThat(originRequestInfo, notNullValue());
-                assertThat(originRequestInfo, is(requestInfo));
+                assertThat(originRequestInfo.getUserId(), is(requestInfo.getUserId()));
 
                 assertThat(originLoginRequest, notNullValue());
                 assertThat(originLoginRequest, is(loginRequest));
@@ -195,9 +204,7 @@ public class BlasterTest extends BaseTest {
                 assertThat(responseInfo.getResponseStatus(), notNullValue());
                 assertThat(responseInfo.getResponseStatus(), is(BaseMsgProtos.ResponseStatus.SUCCESS));
 
-                assertThat(loginResponse, notNullValue());
-                assertThat(loginResponse.getUser(), notNullValue());
-                assertThat(loginResponse.getUser(), is(user));
+                assertThat(responseUser, is(user));
 
 
             }

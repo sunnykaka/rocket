@@ -1,8 +1,6 @@
 package com.rpg.rocket.blaster;
 
-import com.rpg.rocket.blaster.registry.MessageHandlerRegistry;
 import com.rpg.rocket.common.SysConstants;
-import com.rpg.rocket.pb.DescriptorRegistry;
 import com.rpg.rocket.protocol.RequestWrapper;
 import com.rpg.rocket.protocol.ResponseWrapper;
 import com.rpg.rocket.protocol.RocketProtocol;
@@ -47,7 +45,8 @@ public class BlasterSender {
             //已超时,无需返回结果
             return;
         }
-        channel.write(protocol);
+        //FIXME 为什么在这里用write就发送不了请求,即时设置了TCP_NODELAY也不行?
+        channel.writeAndFlush(protocol);
     }
 
     public void sendRequest(Channel channel, RequestWrapper request, final boolean async, MessageResponseHandler messageResponseHandler) {
@@ -58,7 +57,9 @@ public class BlasterSender {
             log.debug("准备发送请求, id[{}], request[{}], async[{}], messageResponseHandler[{}]", new Object[]{id, request, async, messageResponseHandler});
         }
 
-        channel.write(request.getRequestMsg()).addListener(new ChannelFutureListener() {
+        //FIXME 为什么在这里用write就发送不了请求,即时设置了TCP_NODELAY也不行?
+        //FIXME 如果writeAndFlush的参数是(request.getRequestMsg()),为什么operationComplete方法会直接被调用并且future.isSuccess是false?
+        channel.writeAndFlush(request.getProtocol()).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 if(log.isDebugEnabled()) {
@@ -67,6 +68,7 @@ public class BlasterSender {
                 if(future.isSuccess()) {
                     return;
                 }
+                log.warn("发送请求信息失败, requestId[{}]", id);
                 if(!async) {
                     //同步调用的写消息不成功,就往队列里放错误消息
                     TransferQueue<ResponseWrapper> requestWaiterQueue = requestWaiterQueueMap.get(id);

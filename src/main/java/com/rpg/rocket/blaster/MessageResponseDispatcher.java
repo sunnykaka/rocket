@@ -22,7 +22,7 @@ public class MessageResponseDispatcher {
         }
 
         if(log.isDebugEnabled()) {
-            log.debug("开始处理请求的返回结果, requestId[{}], responseId[{}], responseStatus[{}]", new Object[]{originRequest.getProtocol().getId(),
+            log.debug("开始处理请求的返回结果(也可能是超时或发送失败), requestId[{}], responseId[{}], responseStatus[{}]", new Object[]{originRequest.getProtocol().getId(),
                     response == null ? "null" : response.getProtocol().getId(), status});
         }
 

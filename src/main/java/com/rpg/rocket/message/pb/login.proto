@@ -13,9 +13,10 @@ message LoginRequest {
     optional string password = 2;
 
 }
-
+/*
 message LoginResponse {
 
     optional rocket.domain.pb.User user = 1;
 
 }
+*/

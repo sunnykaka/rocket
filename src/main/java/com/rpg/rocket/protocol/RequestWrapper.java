@@ -6,10 +6,6 @@ import com.google.protobuf.Message;
 import com.rpg.rocket.blaster.RequestInfo;
 import com.rpg.rocket.exception.RocketProtocolException;
 import com.rpg.rocket.message.BaseMsgProtos;
-import com.rpg.rocket.pb.DescriptorRegistry;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * User: liubin

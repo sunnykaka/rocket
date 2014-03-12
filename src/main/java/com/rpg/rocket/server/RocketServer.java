@@ -1,7 +1,7 @@
 package com.rpg.rocket.server;
 
 import com.rpg.rocket.blaster.registry.MessageHandlerRegistry;
-import com.rpg.rocket.pb.DescriptorRegistry;
+import com.rpg.rocket.blaster.registry.DescriptorRegistry;
 import com.rpg.rocket.protocol.RocketProtocolDecoder;
 import com.rpg.rocket.protocol.RocketProtocolEncoder;
 import io.netty.bootstrap.ServerBootstrap;
@@ -61,6 +61,7 @@ public class RocketServer {
                     }
                 })
                 .option(ChannelOption.SO_BACKLOG, 128)
+//                .childOption(ChannelOption.TCP_NODELAY, true)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 
         return accept(b);

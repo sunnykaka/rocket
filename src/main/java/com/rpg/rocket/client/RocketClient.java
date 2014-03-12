@@ -1,7 +1,7 @@
 package com.rpg.rocket.client;
 
 import com.rpg.rocket.blaster.registry.MessageHandlerRegistry;
-import com.rpg.rocket.pb.DescriptorRegistry;
+import com.rpg.rocket.blaster.registry.DescriptorRegistry;
 import com.rpg.rocket.protocol.RocketProtocolDecoder;
 import com.rpg.rocket.protocol.RocketProtocolEncoder;
 import io.netty.bootstrap.Bootstrap;
@@ -57,6 +57,7 @@ public class RocketClient {
         b.group(workerGroup);
         b.channel(NioSocketChannel.class);
         b.option(ChannelOption.SO_KEEPALIVE, true);
+//        b.option(ChannelOption.TCP_NODELAY, true);.
         b.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             public void initChannel(SocketChannel ch) throws Exception {

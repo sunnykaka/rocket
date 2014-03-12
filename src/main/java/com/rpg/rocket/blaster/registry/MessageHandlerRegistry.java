@@ -16,6 +16,11 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * 消息处理注册器
+ *
+ * 无论服务器还是客户端都可以对某个消息的到达注册回调函数,消息到的时候会自动调用该函数进行处理
+ *
+ *
  * User: liubin
  * Date: 14-2-27
  */
@@ -39,6 +44,11 @@ public class MessageHandlerRegistry {
         }
     }
 
+    /**
+     * 注册消息请求回调函数
+     * @param descriptor
+     * @param requestHandler
+     */
     public void registerMessageRequestHandler(Descriptors.Descriptor descriptor, MessageRequestHandler requestHandler) {
         String messageType = descriptor.getFullName();
         if(requestHandlerMap.containsKey(messageType)) {

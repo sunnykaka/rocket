@@ -24,6 +24,7 @@ public class RocketProtocolException extends RocketException {
     }
 
     public RocketProtocolException(RocketProtocol.Status status, RocketProtocol protocol) {
+        this(String.format("status[%s], protocol[%s]", status, protocol));
         this.status = status;
         this.protocol = protocol;
     }
