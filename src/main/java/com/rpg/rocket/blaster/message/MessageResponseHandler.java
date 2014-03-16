@@ -1,7 +1,9 @@
-package com.rpg.rocket.blaster;
+package com.rpg.rocket.blaster.message;
 
 import com.google.protobuf.Message;
-import com.rpg.rocket.protocol.RocketProtocol;
+import com.rpg.rocket.blaster.protocol.BlasterProtocol;
+import com.rpg.rocket.blaster.protocol.RequestInfo;
+import com.rpg.rocket.blaster.protocol.ResponseInfo;
 
 /**
  * User: liubin
@@ -25,6 +27,6 @@ public interface MessageResponseHandler {
      * @param originMessage 不会为null
      * @param status 不会为null
      */
-    void handleFailure(RequestInfo originRequestInfo, Message originMessage, RocketProtocol.Status status);
+    void handleFailure(RequestInfo originRequestInfo, Message originMessage, BlasterProtocol.Status status);
 
 }

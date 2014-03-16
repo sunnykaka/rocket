@@ -1,4 +1,4 @@
-package com.rpg.rocket.exception;
+package com.rpg.rocket.blaster.exception;
 
 import com.rpg.rocket.message.BaseMsgProtos;
 
@@ -6,18 +6,18 @@ import com.rpg.rocket.message.BaseMsgProtos;
  * User: liubin
  * Date: 14-3-5
  */
-public class AppException extends RuntimeException {
+public class BlasterBusinessException extends RuntimeException {
 
     private BaseMsgProtos.ResponseStatus responseStatus;
 
     private String msg;
 
-    public AppException(BaseMsgProtos.ResponseStatus responseStatus, String msg) {
+    public BlasterBusinessException(BaseMsgProtos.ResponseStatus responseStatus, String msg) {
         this.responseStatus = responseStatus;
         this.msg = msg;
     }
 
-    public AppException(BaseMsgProtos.ResponseStatus responseStatus) {
+    public BlasterBusinessException(BaseMsgProtos.ResponseStatus responseStatus) {
         this.responseStatus = responseStatus;
     }
 

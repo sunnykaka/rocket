@@ -1,7 +1,8 @@
-package com.rpg.rocket.blaster;
+package com.rpg.rocket.blaster.message;
 
 import com.google.protobuf.Message;
-import com.rpg.rocket.protocol.RocketProtocol;
+import com.rpg.rocket.blaster.protocol.BlasterProtocol;
+import com.rpg.rocket.blaster.protocol.RequestInfo;
 
 /**
  * User: liubin
@@ -21,6 +22,6 @@ public interface MessageRequestHandler {
      * 返回结果是否需要加密
      * @return
      */
-    RocketProtocol.Phase getPhase();
+    BlasterProtocol.Phase getPhase();
 
 }

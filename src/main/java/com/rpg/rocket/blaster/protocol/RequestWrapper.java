@@ -1,10 +1,9 @@
-package com.rpg.rocket.protocol;
+package com.rpg.rocket.blaster.protocol;
 
 import com.google.common.base.Preconditions;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import com.rpg.rocket.blaster.RequestInfo;
-import com.rpg.rocket.exception.RocketProtocolException;
+import com.rpg.rocket.blaster.exception.BlasterProtocolException;
 import com.rpg.rocket.message.BaseMsgProtos;
 
 /**
@@ -13,7 +12,7 @@ import com.rpg.rocket.message.BaseMsgProtos;
  */
 public class RequestWrapper {
 
-    private RocketProtocol protocol;
+    private BlasterProtocol protocol;
 
     private BaseMsgProtos.RequestMsg requestMsg;
 
@@ -21,16 +20,16 @@ public class RequestWrapper {
 
     private RequestInfo requestInfo;
 
-    public RequestWrapper(RocketProtocol protocol) {
+    public RequestWrapper(BlasterProtocol protocol) {
         this.protocol = protocol;
-        Preconditions.checkArgument(RocketProtocol.Type.REQUEST.equals(protocol.getType()));
+        Preconditions.checkArgument(BlasterProtocol.Type.REQUEST.equals(protocol.getType()));
         byte[] data = protocol.getData();
         if(data == null) return;
         //TODO 不允许data为空
         try {
             this.requestMsg = BaseMsgProtos.RequestMsg.parseFrom(data);
         } catch (InvalidProtocolBufferException e) {
-            throw new RocketProtocolException(RocketProtocol.Status.DATA_CORRUPT, protocol);
+            throw new BlasterProtocolException(BlasterProtocol.Status.DATA_CORRUPT, protocol);
         }
 
         this.message = ProtocolUtil.parseMessageFromDataAndType(requestMsg.getMessageType(), requestMsg.getMessage().toByteArray());
@@ -38,11 +37,11 @@ public class RequestWrapper {
         this.requestInfo = new RequestInfo(requestMsg.getUserId());
     }
 
-    public RequestWrapper(int version, RocketProtocol.Phase phase, int timeout, Long userId, Message message) {
+    public RequestWrapper(int version, BlasterProtocol.Phase phase, int timeout, Long userId, Message message) {
         Preconditions.checkNotNull(phase);
         Preconditions.checkNotNull(message);
 
-        RocketProtocol.Builder protocol = RocketProtocol.newBuilder();
+        BlasterProtocol.Builder protocol = BlasterProtocol.newBuilder();
         protocol.setPhase(phase);
         protocol.setVersion(version);
         protocol.setTimeout(timeout);
@@ -66,7 +65,7 @@ public class RequestWrapper {
         return requestMsg;
     }
 
-    public RocketProtocol getProtocol() {
+    public BlasterProtocol getProtocol() {
         return protocol;
     }
 

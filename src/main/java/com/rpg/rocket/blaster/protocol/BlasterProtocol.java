@@ -1,31 +1,24 @@
-package com.rpg.rocket.protocol;
+package com.rpg.rocket.blaster.protocol;
 
-import com.google.common.base.Charsets;
 import com.google.common.primitives.UnsignedBytes;
-import com.google.protobuf.AbstractMessage;
-import com.google.protobuf.Message;
-import com.google.protobuf.MessageLite;
-import com.rpg.rocket.exception.RocketProtocolException;
+import com.rpg.rocket.blaster.exception.BlasterProtocolException;
 import com.rpg.rocket.message.BaseMsgProtos;
-import com.rpg.rocket.util.Clock;
-import com.rpg.rocket.util.IdGenerator;
+import com.rpg.rocket.blaster.util.Clock;
+import com.rpg.rocket.blaster.util.IdGenerator;
 import io.netty.buffer.ByteBuf;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Arrays;
 
 /**
  * User: liubin
  * Date: 14-2-19
  */
-public class RocketProtocol {
+public class BlasterProtocol {
 
     public static final int HEAD_LENGTH = 1 + 1 + 1 + 1 + 4 + 8 + 4;
 
 
-    private RocketProtocol() {}
+    private BlasterProtocol() {}
 
-    private RocketProtocol(int version, Phase phase, Status status, Type type, int id, long timeout, int dataLength, byte[] data) {
+    private BlasterProtocol(int version, Phase phase, Status status, Type type, int id, long timeout, int dataLength, byte[] data) {
         this.version = version;
         this.phase = phase;
         this.status = status;
@@ -61,7 +54,7 @@ public class RocketProtocol {
     private byte[] data;
 
 
-    public static RocketProtocol decode(ByteBuf in) {
+    public static BlasterProtocol decode(ByteBuf in) {
         if(in.readableBytes() < HEAD_LENGTH) return null;
         int originReaderIndex = in.readerIndex();
         int version = UnsignedBytes.toInt(in.readByte());
@@ -81,7 +74,7 @@ public class RocketProtocol {
             data = new byte[dataLength];
             in.readBytes(data, 0, dataLength);
         }
-        RocketProtocol protocol = new RocketProtocol(version, phase, status, type, id, timeout, dataLength, data);
+        BlasterProtocol protocol = new BlasterProtocol(version, phase, status, type, id, timeout, dataLength, data);
         return protocol;
     }
 
@@ -237,7 +230,7 @@ public class RocketProtocol {
 
     @Override
     public String toString() {
-        return "RocketProtocol{" +
+        return "BlasterProtocol{" +
                 "version=" + version +
                 ", phase=" + phase +
                 ", status=" + status +
@@ -254,10 +247,10 @@ public class RocketProtocol {
 
     public static final class Builder {
 
-        private RocketProtocol protocol;
+        private BlasterProtocol protocol;
 
         private Builder() {
-            protocol = new RocketProtocol();
+            protocol = new BlasterProtocol();
         }
 
         private static Builder create() {
@@ -295,7 +288,7 @@ public class RocketProtocol {
 
         public Builder setMessage(BaseMsgProtos.RequestMsg requestMsg) {
             if(protocol.data != null || protocol.dataLength != 0) {
-                throw new RocketProtocolException("创建RocketProtocol失败,为protocol添加message的时候发现内部data或messageType不为空");
+                throw new BlasterProtocolException("创建BlasterProtocol失败,为protocol添加message的时候发现内部data或messageType不为空");
             }
             protocol.type = Type.REQUEST;
             if(requestMsg != null) {
@@ -308,7 +301,7 @@ public class RocketProtocol {
 
         public Builder setMessage(BaseMsgProtos.ResponseMsg responseMsg) {
             if(protocol.data != null || protocol.dataLength != 0) {
-                throw new RocketProtocolException("创建RocketProtocol失败,为protocol添加message的时候发现内部data或messageType不为空");
+                throw new BlasterProtocolException("创建BlasterProtocol失败,为protocol添加message的时候发现内部data或messageType不为空");
             }
             protocol.type = Type.RESPONSE;
             if(responseMsg != null) {
@@ -319,12 +312,12 @@ public class RocketProtocol {
             return this;
         }
 
-        public RocketProtocol build() {
+        public BlasterProtocol build() {
             if(Type.REQUEST.equals(protocol.type)) {
                 protocol.id = IdGenerator.getRequestId();
             } else {
                 if(protocol.id < 1) {
-                    throw new RocketProtocolException("创建RocketProtocol失败,返回消息的id属性不能为空");
+                    throw new BlasterProtocolException("创建BlasterProtocol失败,返回消息的id属性不能为空");
                 }
             }
             return protocol;

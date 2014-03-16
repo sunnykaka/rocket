@@ -1,9 +1,9 @@
 package com.rpg.rocket.client;
 
+import com.rpg.rocket.blaster.netty.handler.BlasterProtocolDecoder;
+import com.rpg.rocket.blaster.netty.handler.BlasterProtocolEncoder;
 import com.rpg.rocket.blaster.registry.MessageHandlerRegistry;
 import com.rpg.rocket.blaster.registry.DescriptorRegistry;
-import com.rpg.rocket.protocol.RocketProtocolDecoder;
-import com.rpg.rocket.protocol.RocketProtocolEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -61,8 +61,8 @@ public class RocketClient {
         b.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             public void initChannel(SocketChannel ch) throws Exception {
-                ch.pipeline().addLast(new RocketProtocolDecoder());
-                ch.pipeline().addLast(new RocketProtocolEncoder());
+                ch.pipeline().addLast(new BlasterProtocolDecoder());
+                ch.pipeline().addLast(new BlasterProtocolEncoder());
                 if(handler != null) {
                     ch.pipeline().addLast(handler);
                 }

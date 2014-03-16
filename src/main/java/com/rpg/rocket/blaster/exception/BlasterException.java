@@ -1,12 +1,10 @@
-package com.rpg.rocket.exception;
-
-import com.rpg.rocket.protocol.RocketProtocol;
+package com.rpg.rocket.blaster.exception;
 
 /**
  * User: liubin
  * Date: 14-2-28
  */
-public class BlasterException extends RocketException {
+public class BlasterException extends RuntimeException {
 
 
     public BlasterException(String message) {

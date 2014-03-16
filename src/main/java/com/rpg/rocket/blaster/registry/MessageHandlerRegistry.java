@@ -1,16 +1,10 @@
 package com.rpg.rocket.blaster.registry;
 
-import com.google.common.base.Preconditions;
 import com.google.protobuf.Descriptors;
-import com.google.protobuf.Message;
-import com.rpg.rocket.blaster.MessageRequestHandler;
-import com.rpg.rocket.blaster.MessageResponseHandler;
-import com.rpg.rocket.exception.BlasterException;
-import com.rpg.rocket.exception.RocketException;
-import com.rpg.rocket.message.LoginProtos;
+import com.rpg.rocket.blaster.message.MessageRequestHandler;
+import com.rpg.rocket.blaster.message.MessageResponseHandler;
+import com.rpg.rocket.blaster.exception.BlasterException;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;

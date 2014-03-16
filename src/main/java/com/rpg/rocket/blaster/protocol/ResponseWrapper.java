@@ -1,11 +1,9 @@
-package com.rpg.rocket.protocol;
+package com.rpg.rocket.blaster.protocol;
 
 import com.google.common.base.Preconditions;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import com.rpg.rocket.blaster.RequestInfo;
-import com.rpg.rocket.blaster.ResponseInfo;
-import com.rpg.rocket.exception.RocketProtocolException;
+import com.rpg.rocket.blaster.exception.BlasterProtocolException;
 import com.rpg.rocket.message.BaseMsgProtos;
 
 /**
@@ -14,7 +12,7 @@ import com.rpg.rocket.message.BaseMsgProtos;
  */
 public class ResponseWrapper {
 
-    private RocketProtocol protocol;
+    private BlasterProtocol protocol;
 
     private BaseMsgProtos.ResponseMsg responseMsg;
 
@@ -22,15 +20,15 @@ public class ResponseWrapper {
 
     private ResponseInfo responseInfo;
 
-    public ResponseWrapper(RocketProtocol protocol) {
+    public ResponseWrapper(BlasterProtocol protocol) {
         this.protocol = protocol;
-        Preconditions.checkArgument(RocketProtocol.Type.RESPONSE.equals(protocol.getType()));
+        Preconditions.checkArgument(BlasterProtocol.Type.RESPONSE.equals(protocol.getType()));
         byte[] data = protocol.getData();
         if(data == null) return;
         try {
             this.responseMsg = BaseMsgProtos.ResponseMsg.parseFrom(data);
         } catch (InvalidProtocolBufferException e) {
-            throw new RocketProtocolException(RocketProtocol.Status.DATA_CORRUPT, protocol);
+            throw new BlasterProtocolException(BlasterProtocol.Status.DATA_CORRUPT, protocol);
         }
         if(responseMsg.getMessageType() != null && responseMsg.getMessage() != null) {
             this.message = ProtocolUtil.parseMessageFromDataAndType(responseMsg.getMessageType(), responseMsg.getMessage().toByteArray());
@@ -40,18 +38,18 @@ public class ResponseWrapper {
 
     }
 
-    public ResponseWrapper(int version, RocketProtocol.Phase phase, int id, RocketProtocol.Status status, BaseMsgProtos.ResponseStatus responseStatus,
+    public ResponseWrapper(int version, BlasterProtocol.Phase phase, int id, BlasterProtocol.Status status, BaseMsgProtos.ResponseStatus responseStatus,
                            String msg, Message message) {
         Preconditions.checkNotNull(phase);
         Preconditions.checkNotNull(status);
 
-        RocketProtocol.Builder protocol = RocketProtocol.newBuilder();
+        BlasterProtocol.Builder protocol = BlasterProtocol.newBuilder();
         protocol.setPhase(phase);
         protocol.setVersion(version);
         protocol.setStatus(status);
         protocol.setResponseId(id);
 
-        if(RocketProtocol.Status.SUCCESS.equals(status)) {
+        if(BlasterProtocol.Status.SUCCESS.equals(status)) {
             //只有正常解析协议了才设置业务对象
             BaseMsgProtos.ResponseMsg.Builder responseMsg = BaseMsgProtos.ResponseMsg.newBuilder();
             if(responseStatus != null) {
@@ -75,7 +73,7 @@ public class ResponseWrapper {
         return responseMsg;
     }
 
-    public RocketProtocol getProtocol() {
+    public BlasterProtocol getProtocol() {
         return protocol;
     }
 

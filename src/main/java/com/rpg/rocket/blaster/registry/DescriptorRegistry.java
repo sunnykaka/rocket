@@ -2,8 +2,8 @@ package com.rpg.rocket.blaster.registry;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
+import com.rpg.rocket.blaster.exception.BlasterException;
 import com.rpg.rocket.domain.UserProtos;
-import com.rpg.rocket.exception.RocketException;
 import com.rpg.rocket.message.LoginProtos;
 
 import java.lang.reflect.InvocationTargetException;
@@ -58,9 +58,9 @@ public class DescriptorRegistry {
         try {
             getDescriptorResult = clazz.getMethod("getDescriptor").invoke(null);
         } catch (NoSuchMethodException e) {
-            throw new RocketException(String.format("class[%s]没有getDescriptor这个类方法,传进来的是protobuf生成类?", clazz.getName()), e);
+            throw new BlasterException(String.format("class[%s]没有getDescriptor这个类方法,传进来的是protobuf生成类?", clazz.getName()), e);
         } catch (InvocationTargetException | IllegalAccessException e) {
-            throw new RocketException(e);
+            throw new BlasterException(e);
         }
         if(getDescriptorResult instanceof Descriptors.FileDescriptor) {
             //必须要是FileDescriptor类型
@@ -75,19 +75,19 @@ public class DescriptorRegistry {
                     messageClass = (Class<? extends Message>) Class.forName(className);
                     pbNameToClassMap.put(descriptor.getFullName(), messageClass);
                 } catch (ClassNotFoundException e) {
-                    throw new RocketException(String.format("根据messageClassName找不到对应的class,register class[%s], messageClassName[%s]",
+                    throw new BlasterException(String.format("根据messageClassName找不到对应的class,register class[%s], messageClassName[%s]",
                             clazz.getName(), className));
                 }
                 try {
                     //存储protobuf类全限定名和parseFrom方法的映射关系,方便进行反序列化
                     pbNameToParseMethodMap.put(descriptor.getFullName(), messageClass.getMethod("parseFrom", byte[].class));
                 } catch (NoSuchMethodException e) {
-                    throw new RocketException(String.format("messageClass没有parseFrom方法,register class[%s], messageClassName[%s]",
+                    throw new BlasterException(String.format("messageClass没有parseFrom方法,register class[%s], messageClassName[%s]",
                             clazz.getName(), className));
                 }
             }
         } else {
-            throw new RocketException(String.format("传进来的protobuf生成类的Descriptor必须是FileDescriptor类型,class[%s], getDescriptorResultClass[%s]",
+            throw new BlasterException(String.format("传进来的protobuf生成类的Descriptor必须是FileDescriptor类型,class[%s], getDescriptorResultClass[%s]",
                     clazz.getName(), getDescriptorResult.getClass().getName()));
         }
     }

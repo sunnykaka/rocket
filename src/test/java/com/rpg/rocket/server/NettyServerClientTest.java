@@ -2,9 +2,9 @@ package com.rpg.rocket.server;
 
 import com.rpg.rocket.BaseTest;
 import com.rpg.rocket.message.BaseMsgProtos;
-import com.rpg.rocket.protocol.RequestWrapper;
-import com.rpg.rocket.protocol.ResponseWrapper;
-import com.rpg.rocket.protocol.RocketProtocol;
+import com.rpg.rocket.blaster.protocol.BlasterProtocol;
+import com.rpg.rocket.blaster.protocol.RequestWrapper;
+import com.rpg.rocket.blaster.protocol.ResponseWrapper;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -13,7 +13,6 @@ import org.testng.annotations.Test;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.hamcrest.MatcherAssert.*;
@@ -27,13 +26,13 @@ public class NettyServerClientTest extends BaseTest {
 
     @Test
     public void test() throws InterruptedException {
-        final List<RocketProtocol> clientProtocolList = new LinkedList<>();
-        final List<RocketProtocol> serverProtocolList = new CopyOnWriteArrayList<>();
+        final List<BlasterProtocol> clientProtocolList = new LinkedList<>();
+        final List<BlasterProtocol> serverProtocolList = new CopyOnWriteArrayList<>();
 
-        RequestWrapper request1 = new RequestWrapper(1, RocketProtocol.Phase.PLAINTEXT, 10000, 123L, buildUser());
-        ResponseWrapper response2 = new ResponseWrapper(1, RocketProtocol.Phase.CIPHERTEXT, 10, RocketProtocol.Status.DATA_CORRUPT, null, null, null);
-        ResponseWrapper response3 = new ResponseWrapper(1, RocketProtocol.Phase.PLAINTEXT, 10, RocketProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.USERNAME_NOT_EXIST, "haha", null);
-        ResponseWrapper response4 = new ResponseWrapper(1, RocketProtocol.Phase.PLAINTEXT, 10, RocketProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.SUCCESS, null, buildUser());
+        RequestWrapper request1 = new RequestWrapper(1, BlasterProtocol.Phase.PLAINTEXT, 10000, 123L, buildUser());
+        ResponseWrapper response2 = new ResponseWrapper(1, BlasterProtocol.Phase.CIPHERTEXT, 10, BlasterProtocol.Status.DATA_CORRUPT, null, null, null);
+        ResponseWrapper response3 = new ResponseWrapper(1, BlasterProtocol.Phase.PLAINTEXT, 10, BlasterProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.USERNAME_NOT_EXIST, "haha", null);
+        ResponseWrapper response4 = new ResponseWrapper(1, BlasterProtocol.Phase.PLAINTEXT, 10, BlasterProtocol.Status.SUCCESS, BaseMsgProtos.ResponseStatus.SUCCESS, null, buildUser());
 
         clientProtocolList.add(request1.getProtocol());
         clientProtocolList.add(response2.getProtocol());
@@ -44,14 +43,14 @@ public class NettyServerClientTest extends BaseTest {
         Channel serverChannel = initServer(new ChannelInboundHandlerAdapter() {
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                RocketProtocol protocol = (RocketProtocol) msg;
+                BlasterProtocol protocol = (BlasterProtocol) msg;
                 serverProtocolList.add(protocol);
             }
         });
 
         //初始化客户端
         Channel clientChannel = initClient(null);
-        for(RocketProtocol protocol : clientProtocolList) {
+        for(BlasterProtocol protocol : clientProtocolList) {
             clientChannel.writeAndFlush(protocol);
         }
 

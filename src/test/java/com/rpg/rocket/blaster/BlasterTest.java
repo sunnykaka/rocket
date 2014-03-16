@@ -1,18 +1,20 @@
 package com.rpg.rocket.blaster;
 
-import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Message;
 import com.rpg.rocket.BaseTest;
-import com.rpg.rocket.common.SysConstants;
+import com.rpg.rocket.blaster.message.AbstractMessageRequestHandler;
+import com.rpg.rocket.blaster.message.AbstractMessageResponseHandler;
+import com.rpg.rocket.blaster.message.MessageDispatcher;
+import com.rpg.rocket.blaster.protocol.RequestInfo;
+import com.rpg.rocket.blaster.protocol.ResponseInfo;
+import com.rpg.rocket.blaster.util.BlasterConstants;
 import com.rpg.rocket.domain.UserProtos;
 import com.rpg.rocket.message.BaseMsgProtos;
 import com.rpg.rocket.message.LoginProtos;
-import com.rpg.rocket.protocol.RequestWrapper;
-import com.rpg.rocket.protocol.RocketProtocol;
-import com.rpg.rocket.server.NettyRocketProtocolReceiver;
+import com.rpg.rocket.blaster.protocol.RequestWrapper;
+import com.rpg.rocket.blaster.protocol.BlasterProtocol;
+import com.rpg.rocket.blaster.netty.handler.NettyBlasterProtocolReceiver;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +36,7 @@ public class BlasterTest extends BaseTest {
 
     public void test() throws InterruptedException {
 
-        int requestCount = 10;
+        int requestCount = 100;
 
         BlasterTestTool blasterTestTool = new BlasterTestTool(requestCount);
 
@@ -42,13 +44,13 @@ public class BlasterTest extends BaseTest {
 
         messageHandlerRegistry.registerMessageRequestHandler(LoginProtos.LoginRequest.getDescriptor(), new LoginRequestHandler(blasterTestTool));
 
-        BlasterSender blasterSender = new BlasterSender();
+        MessageDispatcher messageDispatcher = MessageDispatcher.getInstance();
 
         //初始化服务器端
-        Channel serverChannel = initServer(new NettyRocketProtocolReceiver());
+        Channel serverChannel = initServer(new NettyBlasterProtocolReceiver());
 
 
-        Channel clientChannel = initClient(new NettyRocketProtocolReceiver());
+        Channel clientChannel = initClient(new NettyBlasterProtocolReceiver());
 
         for (int i = 0; i < requestCount ; i++) {
             UserProtos.User user = users.get(i);
@@ -56,9 +58,9 @@ public class BlasterTest extends BaseTest {
             loginRequestBuilder.setUsername(user.getUsername());
             loginRequestBuilder.setPassword(user.getPassword());
 
-            blasterSender.sendRequest(
+            messageDispatcher.request(
                     clientChannel,
-                    new RequestWrapper(SysConstants.PROTOCOL_VERSION, RocketProtocol.Phase.PLAINTEXT, 10000, null, loginRequestBuilder.build()),
+                    new RequestWrapper(BlasterConstants.PROTOCOL_VERSION, BlasterProtocol.Phase.PLAINTEXT, 10000, null, loginRequestBuilder.build()),
                     false, new LoginResponseHandler(blasterTestTool));
         }
 
@@ -67,13 +69,16 @@ public class BlasterTest extends BaseTest {
         //现在请求应该已经被全部接收,验证结果
         blasterTestTool.validate();
 
+        clientChannel.close().sync();
+        serverChannel.close().sync();
+
     }
 
-//    static class NettyRocketProtocolReceiverClientTester extends NettyRocketProtocolReceiver {
+//    static class NettyRocketProtocolReceiverClientTester extends NettyBlasterProtocolReceiver {
 //
 //        @Override
 //        public void channelRead(ChannelHandlerContext ctx, Object msg) {
-//            RocketProtocol protocol = (RocketProtocol) msg;
+//            BlasterProtocol protocol = (BlasterProtocol) msg;
 //            super.channelRead(ctx, msg);
 //        }
 //    }
@@ -99,7 +104,7 @@ public class BlasterTest extends BaseTest {
         }
 
         @Override
-        public RocketProtocol.Phase getPhase() {
+        public BlasterProtocol.Phase getPhase() {
             return super.getPhase();
         }
     }

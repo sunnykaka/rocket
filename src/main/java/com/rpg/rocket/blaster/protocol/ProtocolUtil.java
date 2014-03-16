@@ -1,7 +1,7 @@
-package com.rpg.rocket.protocol;
+package com.rpg.rocket.blaster.protocol;
 
 import com.google.protobuf.Message;
-import com.rpg.rocket.exception.RocketProtocolException;
+import com.rpg.rocket.blaster.exception.BlasterProtocolException;
 import com.rpg.rocket.blaster.registry.DescriptorRegistry;
 
 import java.lang.reflect.InvocationTargetException;
@@ -21,13 +21,13 @@ public class ProtocolUtil {
         }
         Method messageParseMethod = descriptorRegistry.getMessageParseMethod(messageType);
         if(messageParseMethod == null) {
-            throw new RocketProtocolException(RocketProtocol.Status.UNKNOWN_MESSAGE_TYPE, null);
+            throw new BlasterProtocolException(BlasterProtocol.Status.UNKNOWN_MESSAGE_TYPE, null);
         }
         try {
             Message message = (Message)messageParseMethod.invoke(null, messageBytes);
             return message;
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RocketProtocolException(RocketProtocol.Status.DATA_CORRUPT, null);
+            throw new BlasterProtocolException(BlasterProtocol.Status.DATA_CORRUPT, null);
         }
     }
 

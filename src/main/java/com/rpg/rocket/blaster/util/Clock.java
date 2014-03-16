@@ -1,4 +1,4 @@
-package com.rpg.rocket.util;
+package com.rpg.rocket.blaster.util;
 
 /**
  * User: liubin

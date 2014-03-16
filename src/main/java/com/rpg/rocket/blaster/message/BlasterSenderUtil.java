@@ -1,8 +1,8 @@
-package com.rpg.rocket.blaster;
+package com.rpg.rocket.blaster.message;
 
-import com.rpg.rocket.protocol.RequestWrapper;
-import com.rpg.rocket.protocol.ResponseWrapper;
-import com.rpg.rocket.protocol.RocketProtocol;
+import com.rpg.rocket.blaster.protocol.BlasterProtocol;
+import com.rpg.rocket.blaster.protocol.RequestWrapper;
+import com.rpg.rocket.blaster.protocol.ResponseWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,13 +10,19 @@ import org.slf4j.LoggerFactory;
  * User: liubin
  * Date: 14-3-7
  */
-public class MessageResponseDispatcher {
+public class BlasterSenderUtil {
 
-    private static final Logger log = LoggerFactory.getLogger(MessageResponseDispatcher.class);
+    private static final Logger log = LoggerFactory.getLogger(BlasterSenderUtil.class);
 
-    public static void handleResponse(RequestWrapper originRequest, ResponseWrapper response, MessageResponseHandler messageResponseHandler) {
+    /**
+     * 执行响应回调函数
+     * @param originRequest
+     * @param response
+     * @param messageResponseHandler
+     */
+    public static void executeResponseHandler(RequestWrapper originRequest, ResponseWrapper response, MessageResponseHandler messageResponseHandler) {
 
-        RocketProtocol.Status status = RocketProtocol.Status.TIMEOUT;
+        BlasterProtocol.Status status = BlasterProtocol.Status.TIMEOUT;
         if(response != null) {
             status = response.getProtocol().getStatus();
         }
@@ -26,7 +32,7 @@ public class MessageResponseDispatcher {
                     response == null ? "null" : response.getProtocol().getId(), status});
         }
 
-        if(RocketProtocol.Status.SUCCESS.equals(status)) {
+        if(BlasterProtocol.Status.SUCCESS.equals(status)) {
             messageResponseHandler.handleResponse(originRequest.getRequestInfo(), originRequest.getMessage(), response.getResponseInfo(), response.getMessage());
         } else {
             messageResponseHandler.handleFailure(originRequest.getRequestInfo(), originRequest.getMessage(), status);

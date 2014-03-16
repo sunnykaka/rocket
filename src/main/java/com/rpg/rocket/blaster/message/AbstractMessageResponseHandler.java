@@ -1,7 +1,9 @@
-package com.rpg.rocket.blaster;
+package com.rpg.rocket.blaster.message;
 
 import com.google.protobuf.Message;
-import com.rpg.rocket.protocol.RocketProtocol;
+import com.rpg.rocket.blaster.protocol.BlasterProtocol;
+import com.rpg.rocket.blaster.protocol.RequestInfo;
+import com.rpg.rocket.blaster.protocol.ResponseInfo;
 
 /**
  * User: liubin
@@ -12,6 +14,6 @@ public abstract class AbstractMessageResponseHandler implements MessageResponseH
     public abstract void handleResponse(RequestInfo originRequestInfo, Message originMessage, ResponseInfo responseInfo, Message result);
 
     @Override
-    public void handleFailure(RequestInfo originRequestInfo, Message originMessage, RocketProtocol.Status status) {
+    public void handleFailure(RequestInfo originRequestInfo, Message originMessage, BlasterProtocol.Status status) {
     }
 }

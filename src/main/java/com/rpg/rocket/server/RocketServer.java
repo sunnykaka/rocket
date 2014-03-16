@@ -1,9 +1,10 @@
 package com.rpg.rocket.server;
 
+import com.rpg.rocket.blaster.netty.handler.BlasterProtocolDecoder;
+import com.rpg.rocket.blaster.netty.handler.BlasterProtocolEncoder;
+import com.rpg.rocket.blaster.netty.handler.NettyBlasterProtocolReceiver;
 import com.rpg.rocket.blaster.registry.MessageHandlerRegistry;
 import com.rpg.rocket.blaster.registry.DescriptorRegistry;
-import com.rpg.rocket.protocol.RocketProtocolDecoder;
-import com.rpg.rocket.protocol.RocketProtocolEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -53,8 +54,8 @@ public class RocketServer {
                 .childHandler(new ChannelInitializer<SocketChannel>() { // (4)
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline().addLast(new RocketProtocolDecoder());
-                        ch.pipeline().addLast(new RocketProtocolEncoder());
+                        ch.pipeline().addLast(new BlasterProtocolDecoder());
+                        ch.pipeline().addLast(new BlasterProtocolEncoder());
                         if(handler != null) {
                             ch.pipeline().addLast(handler);
                         }
@@ -68,7 +69,7 @@ public class RocketServer {
     }
 
     public Channel accept() throws InterruptedException {
-        return accept(new NettyRocketProtocolReceiver());
+        return accept(new NettyBlasterProtocolReceiver());
     }
 
     public static void main(String[] args) throws Exception {
