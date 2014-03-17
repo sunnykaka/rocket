@@ -51,6 +51,10 @@ public class MessageHandlerRegistry {
         requestHandlerMap.put(messageType, requestHandler);
     }
 
+    public MessageRequestHandler deregisterMessageRequestHandler(Descriptors.Descriptor descriptor) {
+        return requestHandlerMap.remove(descriptor.getFullName());
+    }
+
     public void registerMessageResponseHandler(Descriptors.Descriptor descriptor, MessageResponseHandler responseHandler) {
         String messageType = descriptor.getFullName();
         if(responseHandlerMap.containsKey(messageType)) {

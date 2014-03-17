@@ -26,7 +26,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-@Test
 public class BaseTest {
 
     protected final Logger log = LoggerFactory.getLogger(this.getClass());

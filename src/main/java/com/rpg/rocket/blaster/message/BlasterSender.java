@@ -74,30 +74,35 @@ public class BlasterSender {
         //FIXME 如果writeAndFlush的参数是(request.getRequestMsg()),为什么operationComplete方法会直接被调用并且future.isSuccess是false?
         channel.writeAndFlush(request.getProtocol()).addListener(new ChannelWriteFinishListener(id));
 
-        if(messageResponseHandler == null) return;
-
         if(!async) {
-            //如果是同步消息,需要等待响应返回
-            ResponseWrapper response = null;
-            TransferQueue<ResponseWrapper> requestWaiterQueue = idContext.getRequestWaiterQueue();
-            long timeoutInMillseconds = request.getProtocol().getTimeout() - Clock.nowInMillisecond();
-            if(timeoutInMillseconds > 0) {
-                try {
-                    log.debug("同步请求开始等待返回结果,id[{}],等待时间[{}ms]", id, timeoutInMillseconds);
-                    response = requestWaiterQueue.poll(timeoutInMillseconds, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException e) {
-                    log.error("", e);
+            try {
+                if(messageResponseHandler == null) return;
+                //如果是同步消息,需要等待响应返回
+                ResponseWrapper response = null;
+                TransferQueue<ResponseWrapper> requestWaiterQueue = idContext.getRequestWaiterQueue();
+                long timeoutInMillseconds = request.getProtocol().getTimeout() - Clock.nowInMillisecond();
+                if(timeoutInMillseconds > 0) {
+                    try {
+                        log.debug("同步请求开始等待返回结果,id[{}],等待时间[{}ms]", id, timeoutInMillseconds);
+                        response = requestWaiterQueue.poll(timeoutInMillseconds, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        log.error("", e);
+                    }
+                } else {
+                    //已超时,直接取结果
+                    response = requestWaiterQueue.poll();
                 }
-            } else {
-                //已超时,直接取结果
-                response = requestWaiterQueue.poll();
+
+                try {
+                    BlasterSenderUtil.executeResponseHandler(request, response, messageResponseHandler);
+                } catch (Exception e) {
+                    log.error("同步发送消息并且进行结果处理的时候发生错误", e);
+                }
+            } finally {
+                //同步请求由调用方负责清除数据
+                MessageContext.getInstance().removeContext(id);
             }
 
-            try {
-                BlasterSenderUtil.executeResponseHandler(request, response, messageResponseHandler);
-            } catch (Exception e) {
-                log.error("同步发送消息并且进行结果处理的时候发生错误", e);
-            }
 
         } else {
             //发送异步消息

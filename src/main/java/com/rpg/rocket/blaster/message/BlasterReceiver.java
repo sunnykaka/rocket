@@ -45,6 +45,11 @@ public class BlasterReceiver {
 
         int id = protocol.getId();
 
+        //如果已超时,不做处理
+        if(Clock.isTimeout(protocol.getTimeout())) {
+            return null;
+        }
+
         if(log.isDebugEnabled()) {
             log.debug("接收到{}, id[{}], protocol[{}]", (BlasterProtocol.Type.REQUEST.equals(protocol.getType()) ? "请求" : "响应"), id, protocol);
         }
@@ -67,6 +72,11 @@ public class BlasterReceiver {
 
         if(decipher) {
             //TODO decipher
+        }
+
+        //如果已超时,不做处理
+        if(Clock.isTimeout(protocol.getTimeout())) {
+            return null;
         }
 
         if(BlasterProtocol.Type.REQUEST.equals(protocol.getType())) {
@@ -92,10 +102,6 @@ public class BlasterReceiver {
     protected ResponseWrapper handleRequest(RequestWrapper request) {
         int id = request.getProtocol().getId();
         long timeout = request.getProtocol().getTimeout();
-        //如果已超时,不做处理
-        if(Clock.isTimeout(timeout)) {
-            return null;
-        }
 
         BaseMsgProtos.RequestMsg requestMsg = request.getRequestMsg();
         Message message = request.getMessage();
@@ -132,6 +138,10 @@ public class BlasterReceiver {
             //无响应消息
             return null;
         }
+        //如果已超时,不返回结果
+        if(Clock.isTimeout(timeout)) {
+            return null;
+        }
 
         return new ResponseWrapper(BlasterConstants.PROTOCOL_VERSION, messageRequestHandler.getPhase(), id, BlasterProtocol.Status.SUCCESS, responseStatus, responseMsg, result);
     }
@@ -143,30 +153,31 @@ public class BlasterReceiver {
      */
     protected void handleResponse(ResponseWrapper response) {
         int id = response.getProtocol().getId();
+
         IdContext idContext = MessageContext.getInstance().getContext(id);
         if(idContext == null) {
-            log.error("接收到响应消息,但是根据id查询idContext对象,程序有bug?,requestId[{}], response[{}]", id, response);
+            log.warn("接收到响应消息,但是根据id查询不到idContext对象,requestId[{}], response[{}]", id, response);
             return;
         }
 
-        try {
-            if(!idContext.isAsync()) {
-                //原始请求是同步的
+        if(!idContext.isAsync()) {
+            //原始请求是同步的
 
-                TransferQueue<ResponseWrapper> requestWaiterQueue = idContext.getRequestWaiterQueue();
-                boolean transferResponseToWaitingThreadSuccess = false;
-                try {
-                    //尝试将响应结果传给等待线程
-                    transferResponseToWaitingThreadSuccess = requestWaiterQueue.tryTransfer(response,
-                            BlasterConstants.RECEIVER_TRANSFER_TO_QUEUE_WATITING_TIME, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException e) {
-                    log.error("", e);
-                }
+            TransferQueue<ResponseWrapper> requestWaiterQueue = idContext.getRequestWaiterQueue();
+            boolean transferResponseToWaitingThreadSuccess = false;
+            try {
+                //尝试将响应结果传给等待线程
+                transferResponseToWaitingThreadSuccess = requestWaiterQueue.tryTransfer(response,
+                        BlasterConstants.RECEIVER_TRANSFER_TO_QUEUE_WATITING_TIME, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                log.error("", e);
+            }
 
-                if(!transferResponseToWaitingThreadSuccess)  {
-                    log.warn("接收到同步响应消息,但是无线程在等待该响应消息,requestId[{}], response[{}]", id, response);
-                }
-            } else {
+            if(!transferResponseToWaitingThreadSuccess)  {
+                log.warn("接收到同步响应消息,但是无线程在等待该响应消息,requestId[{}], response[{}]", id, response);
+            }
+        } else {
+            try {
                 //原始请求是异步的
                 MessageResponseHandler messageResponseHandler = idContext.getMessageResponseHandler();
                 if(messageResponseHandler == null) return;
@@ -179,17 +190,18 @@ public class BlasterReceiver {
 
                 try {
                     if(log.isDebugEnabled()) {
-                        log.debug("接收到同步响应消息,运行回调函数,requestId[{}], response[{}]", id, response);
+                        log.debug("接收到异步响应消息,运行回调函数,requestId[{}], response[{}]", id, response);
                     }
                     BlasterSenderUtil.executeResponseHandler(originRequest, response, messageResponseHandler);
                 } catch (Exception e) {
                     log.error("进行异步结果处理的时候发生错误", e);
                 }
+            } finally {
+                //异步请求由接收方或超时处理线程清除数据
+                MessageContext.getInstance().removeContext(id);
             }
-        } finally {
-            //clean
-            MessageContext.getInstance().removeContext(id);
         }
+
 
 
         return;
