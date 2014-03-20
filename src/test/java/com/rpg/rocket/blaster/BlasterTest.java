@@ -5,16 +5,19 @@ import com.rpg.rocket.BaseTest;
 import com.rpg.rocket.blaster.message.AbstractMessageRequestHandler;
 import com.rpg.rocket.blaster.message.AbstractMessageResponseHandler;
 import com.rpg.rocket.blaster.message.MessageDispatcher;
+import com.rpg.rocket.blaster.netty.channel.NettyChannelInitializer;
+import com.rpg.rocket.blaster.netty.handler.NettyBlasterProtocolReceiver;
+import com.rpg.rocket.blaster.protocol.BlasterProtocol;
 import com.rpg.rocket.blaster.protocol.RequestInfo;
+import com.rpg.rocket.blaster.protocol.RequestWrapper;
 import com.rpg.rocket.blaster.protocol.ResponseInfo;
 import com.rpg.rocket.blaster.util.BlasterConstants;
 import com.rpg.rocket.domain.UserProtos;
 import com.rpg.rocket.message.BaseMsgProtos;
 import com.rpg.rocket.message.LoginProtos;
-import com.rpg.rocket.blaster.protocol.RequestWrapper;
-import com.rpg.rocket.blaster.protocol.BlasterProtocol;
-import com.rpg.rocket.blaster.netty.handler.NettyBlasterProtocolReceiver;
 import io.netty.channel.Channel;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +28,6 @@ import java.util.*;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 
 /**
  * User: liubin
@@ -44,14 +45,14 @@ public class BlasterTest extends BaseTest {
     @Test
     public void testSyncRequestSuccess() throws InterruptedException {
 
-        runBlasterTest(100, 0, false);
+        runBlasterTest(100, 0, false, null);
 
     }
 
     @Test
     public void testAsyncRequestSuccess() throws InterruptedException {
 
-        runBlasterTest(100, 0, true);
+        runBlasterTest(100, 0, true, null);
 
     }
 
@@ -59,11 +60,41 @@ public class BlasterTest extends BaseTest {
     @Test
     public void testSyncRequestTimeout() throws InterruptedException {
 
-        runBlasterTest(10, 5, false);
+        runBlasterTest(10, 5, false, null);
 
     }
 
-    private void runBlasterTest(int requestCount, int timeoutCount, boolean async) throws InterruptedException {
+    //TODO 异步超时测试需要等到异步请求超时判断完成才能进行..
+    @Test(enabled = false)
+    public void testAsyncRequestTimeout() throws InterruptedException {
+
+        runBlasterTest(10, 5, false, null);
+
+    }
+
+    //TODO 为什么NioEventLoopGroup用了和没用结果一样?
+    @Test
+    public void testSyncAndConcurrentRequestSuccess() throws InterruptedException {
+
+        runBlasterTest(100, 0, false, new NioEventLoopGroup(10));
+
+    }
+
+    @Test
+    public void testAsyncConcurrentRequestSuccess() throws InterruptedException {
+
+        runBlasterTest(100, 0, true, new NioEventLoopGroup(10));
+
+    }
+
+    @Test
+    public void testSyncAndConcurrentRequestTimeout() throws InterruptedException {
+
+        runBlasterTest(10, 5, false, new NioEventLoopGroup(10));
+
+    }
+
+    private void runBlasterTest(int requestCount, int timeoutCount, boolean async, EventExecutorGroup eventExecutorGroup) throws InterruptedException {
 
         BlasterTestTool blasterTestTool = new BlasterTestTool(requestCount, timeoutCount);
 
@@ -75,10 +106,10 @@ public class BlasterTest extends BaseTest {
         messageHandlerRegistry.registerMessageRequestHandler(LoginProtos.LoginRequest.getDescriptor(), new LoginRequestHandler(blasterTestTool));
 
         //初始化服务器端
-        Channel serverChannel = initServer(new NettyBlasterProtocolReceiver());
+        Channel serverChannel = initServer(new NettyChannelInitializer(eventExecutorGroup, new NettyBlasterProtocolReceiver()));
 
         //初始化客户端
-        Channel clientChannel = initClient(new NettyBlasterProtocolReceiver());
+        Channel clientChannel = initClient(new NettyChannelInitializer(eventExecutorGroup, new NettyBlasterProtocolReceiver()));
 
         for (int i = 0; i < requestCount; i++) {
             UserProtos.User user = users.get(i);

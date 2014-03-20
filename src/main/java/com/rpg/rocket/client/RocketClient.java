@@ -1,5 +1,6 @@
 package com.rpg.rocket.client;
 
+import com.rpg.rocket.blaster.netty.channel.NettyChannelInitializer;
 import com.rpg.rocket.blaster.netty.handler.BlasterProtocolDecoder;
 import com.rpg.rocket.blaster.netty.handler.BlasterProtocolEncoder;
 import com.rpg.rocket.blaster.registry.MessageHandlerRegistry;
@@ -36,7 +37,7 @@ public class RocketClient {
         rocketClient.connect(host, port);
     }
 
-    public Channel connect(String host, int port, final Bootstrap b) throws InterruptedException {
+    private Channel connect(String host, int port, final Bootstrap b) throws InterruptedException {
         // Start the client.
         Channel channel = b.connect(host, port).sync().channel();
         channel.closeFuture().addListener(new ChannelFutureListener() {
@@ -50,7 +51,7 @@ public class RocketClient {
         return channel;
     }
 
-    public Channel connect(String host, int port, final ChannelInboundHandlerAdapter handler) throws InterruptedException {
+    public Channel connect(String host, int port, ChannelInitializer<SocketChannel> channelInitializer) throws InterruptedException {
         final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
         Bootstrap b = new Bootstrap();
@@ -58,22 +59,13 @@ public class RocketClient {
         b.channel(NioSocketChannel.class);
         b.option(ChannelOption.SO_KEEPALIVE, true);
 //        b.option(ChannelOption.TCP_NODELAY, true);
-        b.handler(new ChannelInitializer<SocketChannel>() {
-            @Override
-            public void initChannel(SocketChannel ch) throws Exception {
-                ch.pipeline().addLast(new BlasterProtocolDecoder());
-                ch.pipeline().addLast(new BlasterProtocolEncoder());
-                if(handler != null) {
-                    ch.pipeline().addLast(handler);
-                }
-            }
-        });
+        b.handler(channelInitializer);
 
         return connect(host, port, b);
     }
 
     public Channel connect(String host, int port) throws InterruptedException {
-        return connect(host, port, new RocketClientProtocolHandler());
+        return connect(host, port, new NettyChannelInitializer(new RocketClientProtocolHandler()));
     }
 
 

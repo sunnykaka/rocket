@@ -15,6 +15,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.socket.SocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeTest;
@@ -42,15 +44,15 @@ public class BaseTest {
         DescriptorRegistry.getInstance().init();
     }
 
-    protected Channel initClient(ChannelInboundHandlerAdapter handler) throws InterruptedException {
+    protected Channel initClient(ChannelInitializer<SocketChannel> channelInitializer) throws InterruptedException {
         RocketClient rocketClient = new RocketClient();
-        Channel channel = rocketClient.connect(host, port, handler);
+        Channel channel = rocketClient.connect(host, port, channelInitializer);
         return channel;
     }
 
-    protected Channel initServer(ChannelInboundHandlerAdapter handler) throws InterruptedException {
+    protected Channel initServer(ChannelInitializer<SocketChannel> channelInitializer) throws InterruptedException {
         RocketServer rocketServer = new RocketServer(port);
-        Channel channel = rocketServer.accept(handler);
+        Channel channel = rocketServer.accept(channelInitializer);
         return channel;
     }
 

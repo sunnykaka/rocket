@@ -1,5 +1,6 @@
 package com.rpg.rocket.server;
 
+import com.rpg.rocket.blaster.netty.channel.NettyChannelInitializer;
 import com.rpg.rocket.blaster.netty.handler.BlasterProtocolDecoder;
 import com.rpg.rocket.blaster.netty.handler.BlasterProtocolEncoder;
 import com.rpg.rocket.blaster.netty.handler.NettyBlasterProtocolReceiver;
@@ -29,7 +30,7 @@ public class RocketServer {
         init();
     }
 
-    public Channel accept(final ServerBootstrap b) throws InterruptedException{
+    private Channel accept(final ServerBootstrap b) throws InterruptedException{
         Channel channel = b.bind(port).sync().channel();
 
         channel.closeFuture().addListener(new ChannelFutureListener() {
@@ -44,23 +45,14 @@ public class RocketServer {
         return channel;
     }
 
-    public Channel accept(final ChannelInboundHandlerAdapter handler) throws InterruptedException {
+    public Channel accept(ChannelInitializer<SocketChannel> channelInitializer) throws InterruptedException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .childHandler(new ChannelInitializer<SocketChannel>() { // (4)
-                    @Override
-                    public void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline().addLast(new BlasterProtocolDecoder());
-                        ch.pipeline().addLast(new BlasterProtocolEncoder());
-                        if(handler != null) {
-                            ch.pipeline().addLast(handler);
-                        }
-                    }
-                })
+                .childHandler(channelInitializer)
                 .option(ChannelOption.SO_BACKLOG, 128)
 //                .childOption(ChannelOption.TCP_NODELAY, true)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
@@ -69,7 +61,7 @@ public class RocketServer {
     }
 
     public Channel accept() throws InterruptedException {
-        return accept(new NettyBlasterProtocolReceiver());
+        return accept(new NettyChannelInitializer(new NettyBlasterProtocolReceiver()));
     }
 
     public static void main(String[] args) throws Exception {

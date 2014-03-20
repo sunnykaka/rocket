@@ -1,6 +1,7 @@
 package com.rpg.rocket.server;
 
 import com.rpg.rocket.BaseTest;
+import com.rpg.rocket.blaster.netty.channel.NettyChannelInitializer;
 import com.rpg.rocket.message.BaseMsgProtos;
 import com.rpg.rocket.blaster.protocol.BlasterProtocol;
 import com.rpg.rocket.blaster.protocol.RequestWrapper;
@@ -40,16 +41,16 @@ public class NettyServerClientTest extends BaseTest {
         clientProtocolList.add(response4.getProtocol());
 
         //初始化服务器端
-        Channel serverChannel = initServer(new ChannelInboundHandlerAdapter() {
+        Channel serverChannel = initServer(new NettyChannelInitializer(new ChannelInboundHandlerAdapter() {
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                 BlasterProtocol protocol = (BlasterProtocol) msg;
                 serverProtocolList.add(protocol);
             }
-        });
+        }));
 
         //初始化客户端
-        Channel clientChannel = initClient(null);
+        Channel clientChannel = initClient(new NettyChannelInitializer());
         for(BlasterProtocol protocol : clientProtocolList) {
             clientChannel.writeAndFlush(protocol);
         }
