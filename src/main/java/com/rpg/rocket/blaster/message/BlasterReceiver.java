@@ -45,13 +45,16 @@ public class BlasterReceiver {
 
         int id = protocol.getId();
 
-        //如果已超时,不做处理
-        if(Clock.isTimeout(protocol.getTimeout())) {
-            return null;
-        }
-
         if(log.isDebugEnabled()) {
             log.debug("接收到{}, id[{}], protocol[{}]", (BlasterProtocol.Type.REQUEST.equals(protocol.getType()) ? "请求" : "响应"), id, protocol);
+        }
+
+        //如果已超时,不做处理
+        if(Clock.isTimeout(protocol.getTimeout())) {
+            if(log.isWarnEnabled()) {
+                log.warn("接收到超时请求,不做处理, id[{}], protocol[{}], now[{}]", id, protocol, Clock.nowInMillisecond());
+            }
+            return null;
         }
 
         boolean decipher = false;
@@ -72,11 +75,6 @@ public class BlasterReceiver {
 
         if(decipher) {
             //TODO decipher
-        }
-
-        //如果已超时,不做处理
-        if(Clock.isTimeout(protocol.getTimeout())) {
-            return null;
         }
 
         if(BlasterProtocol.Type.REQUEST.equals(protocol.getType())) {
@@ -140,6 +138,9 @@ public class BlasterReceiver {
         }
         //如果已超时,不返回结果
         if(Clock.isTimeout(timeout)) {
+            if(log.isWarnEnabled()) {
+                log.warn("执行请求结束,但是已超时,不返回结果, id[{}], request[{}]", id, request);
+            }
             return null;
         }
 

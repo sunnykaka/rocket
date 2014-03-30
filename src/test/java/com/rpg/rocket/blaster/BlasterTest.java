@@ -60,7 +60,7 @@ public class BlasterTest extends BaseTest {
     @Test
     public void testSyncRequestTimeout() throws InterruptedException {
 
-        runBlasterTest(10, 5, false, null);
+        runBlasterTest(100, 50, false, null);
 
     }
 
@@ -68,11 +68,14 @@ public class BlasterTest extends BaseTest {
     @Test(enabled = false)
     public void testAsyncRequestTimeout() throws InterruptedException {
 
-        runBlasterTest(10, 5, false, null);
+        runBlasterTest(100, 50, true, null);
 
     }
 
-    //TODO 为什么NioEventLoopGroup用了和没用结果一样?
+    //XXX 为什么NioEventLoopGroup用了和没用结果一样?
+    //answer:在添加handler的时候使用了线程组的情况下,一个handler实例会和一个channel以及线程组中的一个线程绑定,
+    //如果没有使用线程组,则该channel所有的handler实例都使用相同的线程执行.
+    //无论如何,一个handler示例同时只有一个线程在执行,所以不会出现并发情况.
     @Test
     public void testSyncAndConcurrentRequestSuccess() throws InterruptedException {
 
@@ -90,9 +93,18 @@ public class BlasterTest extends BaseTest {
     @Test
     public void testSyncAndConcurrentRequestTimeout() throws InterruptedException {
 
-        runBlasterTest(10, 5, false, new NioEventLoopGroup(10));
+        runBlasterTest(100, 50, false, new NioEventLoopGroup(10));
 
     }
+
+    //TODO 异步超时测试需要等到异步请求超时判断完成才能进行..
+    @Test(enabled = false)
+    public void testAsyncAndConcurrentRequestTimeout() throws InterruptedException {
+
+        runBlasterTest(100, 50, true, new NioEventLoopGroup(10));
+
+    }
+
 
     private void runBlasterTest(int requestCount, int timeoutCount, boolean async, EventExecutorGroup eventExecutorGroup) throws InterruptedException {
 
@@ -225,12 +237,15 @@ public class BlasterTest extends BaseTest {
         private int count = 0;
         //超时请求数量
         private int timeoutCount = 0;
-        //客户端请求等待超时时间
-        private int requestTimeoutParam = 300;
-        //服务器阻塞时间,该时间应该略大于请求线程超时等待时间,但是不能大太多.不然服务器的worker线程被阻塞了,客户端的请求消息会被丢弃
-        //FIXME 当该参数值设的过大,导致服务器worker线程被长时间阻塞的时候,为什么在阻塞的这段时间里,
-        //      客户端请求的数据发往服务器的时候发送成功,但是当worker线程继续工作时,这段时间的数据全部被丢弃!只会处理之后的数据,为什么?
-        private int receiveWaitingParam = requestTimeoutParam + 50;
+
+        //下面两个参数只有超时测试的时候会用到
+        //其中服务器睡眠时间应该略大于客户端请求超时时间,下面服务器睡眠时间为505ms,客户端超时时间为500ms,服务器比客户端大5ms
+        //这样做可以保证在约100个超时请求之内,服务器从睡眠状态醒来处理客户端请求的时候,不至于客户端的请求已经超时
+
+        //客户端请求超时时间
+        private int requestTimeoutParam = 500;
+        //服务器接收到请求后的睡眠时间
+        private int receiveWaitingParam = requestTimeoutParam + 5;
 
         public BlasterTestTool(int count, int timeoutCount) {
             this.timeoutCount = timeoutCount;

@@ -45,11 +45,9 @@ public class BlasterSender {
         if(log.isDebugEnabled()) {
             log.debug("准备发送响应, id[{}], response[{}]", new Object[]{protocol.getId(), response});
         }
-        if(Clock.isTimeout(protocol.getTimeout())) {
-            //已超时,无需返回结果
-            return;
-        }
-        //FIXME 为什么在这里用write就发送不了请求,即时设置了TCP_NODELAY也不行?
+
+        //XXX 为什么在这里用write就发送不了请求,即时设置了TCP_NODELAY也不行?
+        //answer:因为write方法只是将消息加入了待发送队列,消息没有调用flush是不会发送的
         channel.writeAndFlush(protocol);
     }
 
@@ -70,8 +68,10 @@ public class BlasterSender {
         //初始化id上下文信息
         final IdContext idContext = MessageContext.getInstance().initContext(id, async, request, messageResponseHandler);
 
-        //FIXME 为什么在这里用write就发送不了请求,即时设置了TCP_NODELAY也不行?
-        //FIXME 如果writeAndFlush的参数是(request.getRequestMsg()),为什么operationComplete方法会直接被调用并且future.isSuccess是false?
+        //XXX 如果writeAndFlush的参数是(request.getRequestMsg()),为什么operationComplete方法会直接被调用并且future.isSuccess是false?
+        //answer:根据AbstractNioByteChannel.doWrite()方法,如果消息类型不是ByteBuffer或FileRegion,都会抛异常,然后框架内部捕获异常设置write结果失败
+        //XXX 为什么在这里用write就发送不了请求,即时设置了TCP_NODELAY也不行?
+        //answer:因为write方法只是将消息加入了待发送队列,消息没有调用flush是不会发送的
         channel.writeAndFlush(request.getProtocol()).addListener(new ChannelWriteFinishListener(id));
 
         if(!async) {
