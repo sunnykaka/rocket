@@ -75,7 +75,7 @@ public class BlasterTest extends BaseTest {
     //XXX 为什么NioEventLoopGroup用了和没用结果一样?
     //answer:在添加handler的时候使用了线程组的情况下,一个handler实例会和一个channel以及线程组中的一个线程绑定,
     //如果没有使用线程组,则该channel所有的handler实例都使用相同的线程执行.
-    //无论如何,一个handler示例同时只有一个线程在执行,所以不会出现并发情况.
+    //无论如何,一个handler实例同时只有一个线程在执行,所以不会出现并发情况.
     @Test
     public void testSyncAndConcurrentRequestSuccess() throws InterruptedException {
 
