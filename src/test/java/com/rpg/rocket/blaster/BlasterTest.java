@@ -105,6 +105,11 @@ public class BlasterTest extends BaseTest {
 
     }
 
+    @Test(enabled = false)
+    public void testMultiplyClientSyncRequestSuccess() {
+
+    }
+
 
     private void runBlasterTest(int requestCount, int timeoutCount, boolean async, EventExecutorGroup eventExecutorGroup) throws InterruptedException {
 
