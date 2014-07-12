@@ -1,9 +1,15 @@
 package com.rpg.rocket.blaster.registry;
 
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Message;
 import com.rpg.rocket.blaster.message.MessageRequestHandler;
 import com.rpg.rocket.blaster.message.MessageResponseHandler;
 import com.rpg.rocket.blaster.exception.BlasterException;
+import com.rpg.rocket.blaster.protocol.BlasterProtocol;
+import com.rpg.rocket.blaster.protocol.RequestInfo;
+import com.rpg.rocket.domain.UserProtos;
+import com.rpg.rocket.message.LoginProtos;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +40,28 @@ public class MessageHandlerRegistry {
 
     public void init() {
         if(initialized.compareAndSet(false, true)) {
+            registerMessageRequestHandler(LoginProtos.LoginRequest.getDescriptor(), new MessageRequestHandler() {
+                @Override
+                public Message handleRequest(RequestInfo requestInfo, Message message) {
+                    LoginProtos.LoginRequest loginRequest = (LoginProtos.LoginRequest) message;
+                    System.out.println(loginRequest);
+                    if(StringUtils.isBlank(loginRequest.getUsername()) && StringUtils.isBlank(loginRequest.getPassword())) {
+                        return null;
+                    }
+                    UserProtos.User.Builder user = UserProtos.User.newBuilder();
+                    user.setUsername(loginRequest.getUsername());
+                    user.setPassword(loginRequest.getPassword());
+                    user.setId(1);
+                    user.setCoordinate(UserProtos.User.Coordinate.newBuilder().setX(1.0f).setY(2.0f).build());
+                    return user.build();
+                }
 
+                @Override
+                public BlasterProtocol.Phase getPhase() {
+
+                    return BlasterProtocol.Phase.PLAINTEXT;
+                }
+            });
         }
     }
 

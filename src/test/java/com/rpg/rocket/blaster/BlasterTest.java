@@ -186,7 +186,7 @@ public class BlasterTest extends BaseTest {
                 //如果超时参数不为空,等待指定时间
                 try {
                     Thread.sleep(blasterTestTool.receiveWaitingParam);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException    e) {
                     e.printStackTrace();
                 }
             }

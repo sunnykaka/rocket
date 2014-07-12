@@ -3,6 +3,7 @@ package com.rpg.rocket.client;
 import com.rpg.rocket.blaster.netty.channel.NettyChannelInitializer;
 import com.rpg.rocket.blaster.netty.handler.BlasterProtocolDecoder;
 import com.rpg.rocket.blaster.netty.handler.BlasterProtocolEncoder;
+import com.rpg.rocket.blaster.netty.handler.NettyBlasterProtocolReceiver;
 import com.rpg.rocket.blaster.registry.MessageHandlerRegistry;
 import com.rpg.rocket.blaster.registry.DescriptorRegistry;
 import com.rpg.rocket.client.user.service.UserService;
@@ -92,7 +93,7 @@ public class RocketClient {
     }
 
     public Channel connect(String host, int port) throws InterruptedException {
-        return connect(host, port, new NettyChannelInitializer(new RocketClientProtocolHandler()));
+        return connect(host, port, new NettyChannelInitializer(new NettyBlasterProtocolReceiver()));
     }
 
     public void start() throws IOException, InterruptedException {
@@ -106,8 +107,9 @@ public class RocketClient {
         }
         if("CONNECT".equalsIgnoreCase(command)) {
             tryConnect();
+        } else {
+            System.out.println("unknown command, please input 'connect' or 'quit'");
         }
-        System.out.println("unknown command, please input 'connect' or 'quit'");
     }
 
     private void tryConnect() throws IOException{
@@ -144,4 +146,7 @@ public class RocketClient {
         System.out.println(String.format("connect to %s:%d", host, port));
     }
 
+    public Channel getChannel() {
+        return channel;
+    }
 }
